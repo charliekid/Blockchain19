@@ -20,11 +20,11 @@ We will work with Jonathan and Matt from the DMDC to make a program that will tr
 
 ## Dependencies / Risks
 - Dependencies: 
-⋅⋅⋅- The usage of SHA-256, RSA encryption scheme
-⋅⋅⋅- Understanding the blockchain model.
-⋅⋅⋅- Learning and refreshing on java and the Google cloud platform we would be using.
+    - The usage of SHA-256, RSA encryption scheme
+    - Understanding the blockchain model.
+    - Learning and refreshing on java and the Google cloud platform we would be using.
 - Risk: 
-⋅⋅⋅- Blockchain not working as expected, or potentially less efficient than existing databases and tracking methods.
+    - Blockchain not working as expected, or potentially less efficient than existing databases and tracking methods.
 
 ## Project Deliverables
 - Blockchain-powered tracker for supply chain management

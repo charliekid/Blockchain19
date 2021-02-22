@@ -2,7 +2,7 @@
 This project is implement a blockchain system that will decentralize and help track the integrity and process of the COVID19 vaccine.
 
 ## Project Board
-
+https://github.com/charliekid/Blockchain19/projects/1
 
 ## Project Mission / Motiviation
 

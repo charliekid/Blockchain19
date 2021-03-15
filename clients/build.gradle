@@ -1,4 +1,5 @@
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 sourceSets {
     main {
@@ -7,6 +8,10 @@ sourceSets {
         }
     }
 }
+repositories {
+    mavenCentral()
+}
+
 
 dependencies {
     // Corda dependencies.
@@ -21,6 +26,16 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j_version}"
     compile "org.apache.logging.log4j:log4j-web:${log4j_version}"
     compile "org.slf4j:jul-to-slf4j:$slf4j_version"
+
+    //Springboot
+    compile group: 'org.thymeleaf', name: 'thymeleaf-spring5', version: '3.0.11.RELEASE'
+    compile group: 'org.thymeleaf.extras', name: 'thymeleaf-extras-springsecurity5', version: '3.0.4.RELEASE'
+//    implementation 'org.springframework.boot:spring-boot-starter-web'
+//    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//
+//    implementation('org.springframework.boot:spring-boot-starter-thymeleaf')
+//    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+//    runtime('org.springframework.boot:spring-boot-devtools')
 }
 
 springBoot {

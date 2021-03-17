@@ -1,15 +1,51 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Example front-end.</title>
+    <script type="text/javascript">
+    function gotoPage()
+    {
+        var url = document.getElementById('users').value;
+        if(url != 'none') {
+            window.location = url;
+        }
+    }
+    </script>
+    <title>COVID Vaccine Tracker</title>
 </head>
 <body>
 <div>
-    <img src="https://www.corda.net/wp-content/uploads/2016/11/fg005_corda_b.png" alt="Corda" width="500">
-    <h1>CorDapp Template (Java Version)</h1>
-    <p>Learn more about how to build CorDapps at <a href="http://www.github.com/corda/samples-java">sample-java</a></p>
+    <h1>COVID Vaccine Tracker</h1>
+
+    <img src="blockchainlogo.png" width="250" height="250">
 </div>
+<br><br>
+<div id="userSelect">
+    <form>
+        <label for="users">Pick a user:</label>
+        <select id="users">
+            <option value="patientPage.html">Patient</option>
+            <option value="doctorPage.html">Doctor</option>
+            <option value="employer">Employer</option>
+        </select>
+    </form>
+</div>
+<input type="button" value="Submit" onclick="gotoPage()">
+
+<!--<div style="display: inline-block;float: right;margin: 15px 0;padding: 0 5px;">-->
+<!--    <div class="dropdown">-->
+<!--        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"-->
+<!--                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">-->
+<!--            {{appCtrl.activeParty}}-->
+<!--            <span class="caret"></span>-->
+<!--        </button>-->
+<!--        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">-->
+<!--            <li><a href="#" ng-show="appCtrl.activeParty != 'PartyA'" ng-click="appCtrl.switchParty('PartyA')">Party A</a></li>-->
+<!--            <li><a href="#" ng-show="appCtrl.activeParty != 'PartyB'" ng-click="appCtrl.switchParty('PartyB')">Party B</a></li>-->
+<!--            <li><a href="#" ng-show="appCtrl.activeParty != 'PartyC'" ng-click="appCtrl.switchParty('PartyC')">Party C</a></li>-->
+<!--        </ul>-->
+<!--    </div>-->
+<!--</div>-->
 </body>
 </html>

@@ -20,7 +20,7 @@ public class Controller {
         this.proxy = rpc.proxy;
     }
 
-    @GetMapping(value = "/templateendpoint", produces = "text/plain")
+    @GetMapping(value = "/", produces = "text/plain")
     private String templateendpoint() {
         return "Define an endpoint here.";
     }

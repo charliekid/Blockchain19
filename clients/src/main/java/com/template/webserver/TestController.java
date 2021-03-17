@@ -17,5 +17,17 @@ public class TestController {
         return "doctorPage";
     }
 
+    @GetMapping("/patientPage")
+    private String patientPage(){
+        return "patientPage";
+    }
 
+    @GetMapping("/homePage")
+    private String homePage(){
+        return "homePage";
+    }
+    @GetMapping("/")
+    private String login(){
+        return "index";
+    }
 }

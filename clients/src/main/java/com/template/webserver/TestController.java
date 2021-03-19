@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class TestController {
     @GetMapping("/secondPage")
     private String secondPage() {
-        return "anotherPage";
+        return "redirect:homPage";
     }
 
     @GetMapping("/doctorPage")
@@ -26,8 +26,16 @@ public class TestController {
     private String homePage(){
         return "homePage";
     }
+
     @GetMapping("/")
     private String login(){
         return "index";
     }
+
+    @GetMapping("/signUp")
+    private String signUp () {
+        return "signup";
+    }
+
+
 }

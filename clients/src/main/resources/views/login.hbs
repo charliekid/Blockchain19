@@ -10,18 +10,28 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
     <!--	ajax-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="../public/stylesheets/style.css" />
+    <link rel="stylesheet" type="text/css" href="/style.css" />
 
     <!--Fontawesome CDN-->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
-    <title>Springboot home page</title>
+ <title>COVID Vaccine Tracker</title>
 </head>
 <body>
-<div>
-    <img src="https://www.corda.net/wp-content/uploads/2016/11/fg005_corda_b.png" alt="Corda" width="500">
-    <h1>CorDapp Template (Java Version)</h1>
-    <p>Learn more about how to build CorDapps at <a href="http://www.github.com/corda/samples-java">sample-java</a></p>
-</div>
+<!--<div>-->
+<!--    <h1>COVID Vaccine Tracker Login</h1>-->
+<!--    <img src="blockchainlogo.png" width="250" height="250">-->
+<!--</div>-->
+
+<!--<div>-->
+<!--    <label for="username">Username: </label>-->
+<!--    <input id="username">-->
+
+<!--    <label for="password">Password: </label>-->
+<!--    <input id="password">-->
+<!--</div>-->
+<!--<br><br>-->
+<!--<button onclick="">Login</button>-->
+<!--<a href="signup.html"> Sign-Up </a>-->
 
 <!--    START: This portion was taken from : https://bootsnipp.com/snippets/E1gVl-->
 <div class="container">
@@ -32,21 +42,21 @@
 
         </div>
         <div class="card-body">
-            <form action="#" th:action="@{/patientPage}" method="post" th:object="${userinfo}">                <div class="input-group form-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+            <form action="#"  method="post" >                <div class="input-group form-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    </div>
+                    <input type="text" name="email" class="form-control" placeholder="Username" id="username">
                 </div>
-                <input type="text" th:field="*{username}" name="email" class="form-control" placeholder="Username">
-            </div>
 
                 <div class="input-group form-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="fas fa-key"></i></span>
                     </div>
-                    <input type="password" th:field="*{password}" name="password" class="form-control" placeholder="Password">
+                    <input type="password"  name="password" class="form-control" placeholder="Password" id="password">
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="submitBtn">
                     <input type="submit" name="btn" value="Login" class="btn btn-outline-danger float-right login_btn">
                 </div>
 
@@ -55,6 +65,29 @@
     </div>
 </div>
 <!--    END: This portion was taken from : https://bootsnipp.com/snippets/E1gVl-->
+<script>
 
+
+    $('#submitBtn').click(function (e) {
+        var loginData = {
+            memberId : $('#username').val(),
+            memberPw : $('#password').val()
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/login/assetList",
+            data: loginData,
+            success: function (result) {
+                // do something.
+                console.log()
+            },
+            error: function (result) {
+                // do something.
+            }
+        });
+    });
+</script>
 </body>
+
 </html>

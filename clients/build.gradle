@@ -27,6 +27,8 @@ dependencies {
 
     compile group: 'org.thymeleaf', name: 'thymeleaf-spring5', version: '3.0.11.RELEASE'
     compile group: 'org.thymeleaf.extras', name: 'thymeleaf-extras-springsecurity5', version: '3.0.4.RELEASE'
+    //compile("org.springframework.boot:spring-boot-starter-security")
+
 }
 
 springBoot {

@@ -18,6 +18,7 @@ buildscript {//properties that you need to build the project
         spring_boot_version = '2.0.2.RELEASE'
         spring_boot_gradle_plugin_version = '2.0.2.RELEASE'
         thymeleaf_version = constants.getProperty("thymeleafVersion")
+
     }
 
     repositories {
@@ -32,6 +33,7 @@ buildscript {//properties that you need to build the project
         classpath "net.corda.plugins:cordformation:$corda_gradle_plugins_version"
         classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
         classpath "org.springframework.boot:spring-boot-gradle-plugin:$spring_boot_gradle_plugin_version"
+
     }
 }
 

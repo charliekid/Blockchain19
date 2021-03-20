@@ -1,8 +1,41 @@
 /*Style sheet was provided by https://bootsnipp.com/snippets/1KA79*/
-/*Main CSS*/
+
+Skip to content
+Pull requests
+Issues
+Marketplace
+Explore
+@charliekid
+charliekid /
+Blockchain19
+
+2
+0
+
+0
+
+Code
+Issues
+Pull requests
+Actions
+Projects 1
+Wiki
+Security
+Insights
+
+Settings
+
+Blockchain19/clients/src/main/resources/static/dashboardStyles.css
+@charliekid
+charliekid Created a dashboard
+Latest commit 82df78c 3 hours ago
+History
+1 contributor
+702 lines (628 sloc) 13.1 KB
+    /*Main CSS*/
 
 
-/*Login Signup Page*/
+    /*Login Signup Page*/
 a:focus,a:hover,a{
     outline:none;
     text-decoration: none;
@@ -701,3 +734,4 @@ header {
         width: 100%;
     }
 }
+

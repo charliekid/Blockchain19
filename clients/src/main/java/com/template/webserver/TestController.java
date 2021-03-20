@@ -19,11 +19,11 @@ public class TestController {
         return "doctorPage";
     }
 
-    @GetMapping("/patientPage")
-    private String patientPage(Model model){
-        model.addAttribute("userinfo",new userInfo());
-        return "patientPage";
-    }
+//    @GetMapping("/patientPage")
+//    private String patientPage(Model model){
+//        model.addAttribute("userinfo",new userInfo());
+//        return "patientPage";
+//    }
     @PostMapping("/patientPage")
     private String loginPost(@ModelAttribute("userinfo") userInfo userinfo, Model model){
         System.out.println("Username entered is: " + userinfo.getUsername());
@@ -38,7 +38,8 @@ public class TestController {
     }
 
     @GetMapping("/")
-    private String login(){
+    private String login(Model model){
+        model.addAttribute("userinfo", new userInfo());
         return "index";
     }
 

@@ -19,26 +19,4 @@ public class LoginController {
     public void getStates() {
 
     }
-
-    @GetMapping("/assetList")
-    public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(){
-        // Lets assume we got the local host and node address somehow
-        NetworkHostAndPort nodeAddress = new NetworkHostAndPort("localhost", 10006);
-
-        // Sets up the connection to our node with the specified
-        // we prolly might want to do a try catch here for when some enters in the wrong user name maybe
-        CordaRPCClient client = new CordaRPCClient(nodeAddress);
-        CordaRPCConnection connection = client.start("user1", "test");
-        CordaRPCOps activeParty = connection.getProxy();
-
-        try{
-            List<StateAndRef<PatientInfoState>> assetList = activeParty.vaultQuery(PatientInfoState.class).getStates();
-            System.out.println("asset list " + assetList);
-            return APIResponse.success(assetList);
-        }catch(Exception e){
-            return APIResponse.error(e.getMessage());
-        }
-    }
-
-
 }

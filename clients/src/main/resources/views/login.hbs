@@ -10,28 +10,13 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
     <!--	ajax-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
 
     <!--Fontawesome CDN-->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
  <title>COVID Vaccine Tracker</title>
 </head>
 <body>
-<!--<div>-->
-<!--    <h1>COVID Vaccine Tracker Login</h1>-->
-<!--    <img src="blockchainlogo.png" width="250" height="250">-->
-<!--</div>-->
-
-<!--<div>-->
-<!--    <label for="username">Username: </label>-->
-<!--    <input id="username">-->
-
-<!--    <label for="password">Password: </label>-->
-<!--    <input id="password">-->
-<!--</div>-->
-<!--<br><br>-->
-<!--<button onclick="">Login</button>-->
-<!--<a href="signup.html"> Sign-Up </a>-->
 
 <!--    START: This portion was taken from : https://bootsnipp.com/snippets/E1gVl-->
 <div class="container">
@@ -42,11 +27,11 @@
 
         </div>
         <div class="card-body">
-            <form action="#"  method="post" >                <div class="input-group form-group">
+            <form action="/login"  method="post" >                <div class="input-group form-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                     </div>
-                    <input type="text" name="email" class="form-control" placeholder="Username" id="username">
+                    <input type="text" name="username" class="form-control" placeholder="Username" id="username">
                 </div>
 
                 <div class="input-group form-group">
@@ -65,29 +50,47 @@
     </div>
 </div>
 <!--    END: This portion was taken from : https://bootsnipp.com/snippets/E1gVl-->
+</body>
 <script>
-
-
-    $('#submitBtn').click(function (e) {
-        var loginData = {
-            memberId : $('#username').val(),
-            memberPw : $('#password').val()
-        }
-
-        $.ajax({
-            type: "POST",
-            url: "/login/assetList",
-            data: loginData,
-            success: function (result) {
-                // do something.
-                console.log()
-            },
-            error: function (result) {
-                // do something.
-            }
-        });
+    $(document).ready(function() {
+        $('#message').hide();
+        $('#loginButton').on('click', function(e) {
+            // Do not submit until I am ready
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "/login",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    // we should prolly hash this
+                    "username": $("#username").val(),
+                    "password": $("#password").val()
+                }),
+                success: function(result, status) {
+                    console.log("got login status back", result);
+                    if (result.successful) {
+                        // This will navigate to wherever i say...
+                        window.location.href = '/dashboard';
+                    } else if (result.successful === "true") {
+                        // This will navigate to wherever i say...
+                        window.location.href = '/dashboard';
+                    }
+                    else {
+                        // Show an error message or something and stay here
+                        $('#message').html(result.message);
+                        $('#message').show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    err = eval("error: (" + xhr.responseText + ")");
+                    console.error(err);
+                },
+                complete: function(data, status) { //optional, used for debugging purposes
+                    console.log(status);
+                }
+            });
+        })
     });
 </script>
-</body>
-
 </html>

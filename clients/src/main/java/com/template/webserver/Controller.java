@@ -37,7 +37,7 @@ public class Controller {
      * is viewable by the party.
      * @return
      */
-    @GetMapping("asset/list")
+    @GetMapping("transaction/list")
     public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(){
         NetworkHostAndPort nodeAddress = new NetworkHostAndPort("localhost", 10006);
 

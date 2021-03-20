@@ -5,7 +5,7 @@ var router = express.Router();
 /* GET home page. */
 router.get('/', function(req, res, next) {
     var data;
-    http.get("http://localhost:10050/asset/list", (resp) => {
+    http.get("http://localhost:10050/login/list", (resp) => {
         resp.on("data", (information) => {
             data += information
         });

@@ -37,10 +37,10 @@ router.post('/', function(req, res, next) {
     }
 
     // Return success or failure
-    res.json({
-        successful: successful,
-        message: message
-    });
+    // res.json({
+    //     successful: successful,
+    //     message: message
+    // });
 
     //res.render('login');
 });

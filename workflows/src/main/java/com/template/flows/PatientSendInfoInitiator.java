@@ -34,7 +34,7 @@ public class PatientSendInfoInitiator extends FlowLogic<SignedTransaction> {
     private final String lastName;
     private final int dose;
 
-    private boolean vaccinationProcessComplete;
+    private final boolean vaccinationProcessComplete;
 
 
     private final String firstDoseLot;
@@ -46,22 +46,6 @@ public class PatientSendInfoInitiator extends FlowLogic<SignedTransaction> {
     private final Party doctor;
     private final Party patientEmployer;
 
-    //public constructor
-//    public PatientSendInfoInitiator(String firstName, String lastName, int dose,
-//                                    Party patientFullName, Party doctor, Party patientEmployer) {
-//        this.firstName = firstName;
-//        this.lastName = lastName;
-//        this.dose = dose;
-//        this.patientFullName = patientFullName;
-//        this.doctor = doctor;
-//        this.patientEmployer = patientEmployer;
-        // variables set to null/false by default -- uncomment if needed
-//        this.vaccinationProcessComplete = false;
-//        this.firstDoseLot = null;
-//        this.firstDoseManufacturer = null;
-//        this.secondDoseLot = null;
-//        this.secondDoseManufacturer = null;
-//    }
 
     public PatientSendInfoInitiator(String firstName,
                             String lastName,

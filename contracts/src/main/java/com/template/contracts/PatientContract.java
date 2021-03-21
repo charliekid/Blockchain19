@@ -60,6 +60,7 @@ public class PatientContract implements Contract {
             requireThat(require -> {
 //                require.using("No inputs should be consumed when sending just the patient information", tx.getInputStates().size() == 0);
 
+
                 require.using("Patient should currently not have any doses", output.getDose() != 0);
                 return null;
             });
@@ -88,7 +89,7 @@ public class PatientContract implements Contract {
             requireThat(require -> {
 //                require.using("No inputs should be consumed when sending just the patient information", tx.getInputStates().size() == 0);
 
-                require.using("Patient should currently not have any doses", output.getDose() != 0);
+                require.using("Patient should currently have one dose.", output.getDose() != 1);
                 return null;
             });
         }
@@ -102,7 +103,8 @@ public class PatientContract implements Contract {
             requireThat(require -> {
 //                require.using("No inputs should be consumed when sending just the patient information", tx.getInputStates().size() == 0);
 
-                require.using("Patient should currently not have any doses", output.getDose() != 0);
+                // todo: check for input with pfizer, moderna
+                require.using("Patient should have their two doses.", !(output.getDose() == 2 || output.getFirstDoseManufacturer() == null));
                 return null;
             });
         }

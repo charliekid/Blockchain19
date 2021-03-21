@@ -15,8 +15,10 @@ import static net.corda.testing.driver.Driver.driver;
 import static org.junit.Assert.assertEquals;
 
 public class DriverBasedTest {
-    private final TestIdentity bankA = new TestIdentity(new CordaX500Name("BankA", "", "GB"));
-    private final TestIdentity bankB = new TestIdentity(new CordaX500Name("BankB", "", "US"));
+    private final TestIdentity bankA = new TestIdentity(new CordaX500Name("Charlie", "Marina", "US"));
+    private final TestIdentity bankB = new TestIdentity(new CordaX500Name("Jorge", "Monterey", "US"));
+    private final TestIdentity bankC = new TestIdentity(new CordaX500Name("Marc", "Seaside", "US"));
+
 
     @Test
     public void nodeTest() {
@@ -24,7 +26,8 @@ public class DriverBasedTest {
             // Start a pair of nodes and wait for them both to be ready.
             List<CordaFuture<NodeHandle>> handleFutures = ImmutableList.of(
                     dsl.startNode(new NodeParameters().withProvidedName(bankA.getName())),
-                    dsl.startNode(new NodeParameters().withProvidedName(bankB.getName()))
+                    dsl.startNode(new NodeParameters().withProvidedName(bankB.getName())),
+                    dsl.startNode(new NodeParameters().withProvidedName(bankC.getName()))
             );
 
             try {

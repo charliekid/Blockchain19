@@ -238,4 +238,6 @@ Once you've finished the CorDapp's code, run it with the following steps:
 * You can now see the tokens in the vaults of Patient1 and Doctor1 and Employer1
   by running the following command in their respective terminals:
 
-  `run vaultQuery contractStateType: com.template.states`
+  `run vaultQuery contractStateType: com.template.states.PatientInfoState`
+
+* You must run both the "runTemplateServer" (ran in the root of project) and "npx nodemon" (ran in root of resources within clients folder)

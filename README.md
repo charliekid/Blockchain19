@@ -1,4 +1,6 @@
 # Blockchain19
+[![Build Status](https://travis-ci.com/charliekid/Blockchain19.svg?branch=main)](https://travis-ci.com/charliekid/Blockchain19)
+
 This project is implement a blockchain system that will decentralize and help track the integrity and process of the COVID19 vaccine.
 
 ## Project Board

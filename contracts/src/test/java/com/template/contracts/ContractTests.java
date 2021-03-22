@@ -15,10 +15,11 @@ public class ContractTests {
     private final TestIdentity charlie = new TestIdentity(new CordaX500Name("Charlie", "", "GB"));
     private final TestIdentity jorge = new TestIdentity(new CordaX500Name("Jorge", "", "GB"));
     private final TestIdentity marc = new TestIdentity(new CordaX500Name("Marc", "", "GB"));
+    private final TestIdentity jonathan = new TestIdentity(new CordaX500Name("Jonathan", "", "GB"));
 
     private final MockServices ledgerServices = new MockServices();
 
-    private PatientInfoState patientInfoState = new PatientInfoState("marc", "alejandro", 0, false, null, null, null, null, marc.getParty(), jorge.getParty(), charlie.getParty());
+    private PatientInfoState patientInfoState = new PatientInfoState("marc", "alejandro", 0, false, null, null, null, null, null, null, false, marc.getParty(), jorge.getParty(), charlie.getParty(), jonathan.getParty());
 
     @Test
     public void dummyTest() {

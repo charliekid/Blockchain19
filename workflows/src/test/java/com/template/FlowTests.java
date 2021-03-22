@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 
 public class FlowTests {
     private MockNetwork network;
-    private StartedMockNode a, b, c;
+    private StartedMockNode a, b, c, d;
 
     // im not sure if we use those or not, but we will leave those here just in case.
     private final TestIdentity charlie = new TestIdentity(new CordaX500Name("Charlie", "", "GB"));
@@ -69,7 +69,7 @@ public class FlowTests {
 
     @Test
     public void transactionConstructedByFlowUsesTheCorrectNotary() throws Exception {
-        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0));
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, null, null, false, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0), d.getInfo().getLegalIdentities().get(0));
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
@@ -82,7 +82,7 @@ public class FlowTests {
 
     @Test
     public void transactionConstructedByFlowHasOneTokenStateOutputWithTheCorrectAmountAndOwner() throws Exception {
-        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0));
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, null, null, false, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0), d.getInfo().getLegalIdentities().get(0));
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
@@ -97,7 +97,7 @@ public class FlowTests {
 
     @Test
     public void transactionConstructedByFlowHasOneOutputUsingTheCorrectContract() throws Exception {
-        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0));
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, null, null, false, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0), d.getInfo().getLegalIdentities().get(0));
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
@@ -110,7 +110,7 @@ public class FlowTests {
 
     @Test
     public void transactionConstructedByFlowHasOneIssueCommand() throws Exception {
-        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0));
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, null, null, false, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0), d.getInfo().getLegalIdentities().get(0));
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
@@ -123,7 +123,7 @@ public class FlowTests {
 
     @Test
     public void transactionConstructedByFlowHasOneCommandWithTheIssuerAndTheOwnerAsASigners() throws Exception {
-        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0));
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, null, null, false, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0), d.getInfo().getLegalIdentities().get(0));
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
@@ -140,7 +140,7 @@ public class FlowTests {
 
     @Test
     public void transactionConstructedByFlowHasNoInputsAttachmentsOrTimeWindows() throws Exception {
-        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0));
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("Marc", "Alejandro", 0, false, null, null, null, null, null, null, false, a.getInfo().getLegalIdentities().get(0), b.getInfo().getLegalIdentities().get(0), c.getInfo().getLegalIdentities().get(0), d.getInfo().getLegalIdentities().get(0));
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();

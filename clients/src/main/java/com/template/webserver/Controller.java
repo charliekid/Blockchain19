@@ -8,9 +8,7 @@ import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.utilities.NetworkHostAndPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -48,6 +46,45 @@ public class Controller {
             System.out.println("ERROR in ASSET/LIST");
             return APIResponse.error(e.getMessage());
         }
+    }
+    @RequestMapping(value = "/postmethod", method = RequestMethod.POST)
+    public APIResponse<Void> postMethod() {
+        return APIResponse.success();
+    }
+    @PostMapping("checkUserName")
+    public boolean isValidLogIn(@RequestBody Forms.LoginForm loginInfo) {
+        String username = loginInfo.getUsername();
+        String password = loginInfo.getPassword();
+
+        boolean result = false;
+
+        String patient1Username = "Patient1";
+        String doctor1Username = "Doctor1";
+        String employer1Username = "Employer1";
+        String clinicAdminUsername = "ClinicAdmin1";
+
+        String pass = "test";
+
+        if(username.equals(patient1Username)) {
+            if(password.equals(pass)) {
+                result = true;
+            }
+        } else if (username.equals(doctor1Username)) {
+            if(password.equals(pass)) {
+                result = true;
+            }
+        } else if (username.equals(employer1Username)) {
+            if(password.equals(pass)) {
+                result = true;
+            }
+        } else if (username.equals(clinicAdminUsername)) {
+            if(password.equals(pass)) {
+                result = true;
+            }
+        } else {
+            return  result;
+        }
+        return result;
     }
 
 

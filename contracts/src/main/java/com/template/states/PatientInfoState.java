@@ -15,6 +15,7 @@ import java.util.List;
 // *********
 @BelongsToContract(PatientContract.class)
 
+
 public class PatientInfoState implements ContractState {
 
     //private variables

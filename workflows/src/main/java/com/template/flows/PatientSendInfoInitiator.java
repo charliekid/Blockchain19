@@ -2,9 +2,8 @@ package com.template.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
 import com.template.contracts.PatientContract;
-import com.template.contracts.TemplateContract;
 import com.template.states.PatientInfoState;
-import com.template.states.TemplateState;
+import net.corda.core.contracts.Command;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
@@ -12,6 +11,7 @@ import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 // ******************
 @InitiatingFlow
 @StartableByRPC
+
 public class PatientSendInfoInitiator extends FlowLogic<SignedTransaction> {
 
     // We will not use these ProgressTracker for this Hello-World sample
@@ -34,19 +35,59 @@ public class PatientSendInfoInitiator extends FlowLogic<SignedTransaction> {
     private final String lastName;
     private final int dose;
 
+    private final boolean approvedForVaccination;
+
+    private final Date firstDoseDate;
+    private final String firstDoseLot;
+    private final String firstDoseManufacturer;
+
+    private final Date secondDoseDate;
+    private final String secondDoseManufacturer;
+    private final String secondDoseLot;
+
+    private final boolean vaccinationProcessComplete;
+
     private final Party patientFullName;
     private final Party doctor;
     private final Party patientEmployer;
+    private final Party clinicAdmin;
 
-    //public constructor
-    public PatientSendInfoInitiator(String firstName, String lastName, int dose,
-                                    Party patientFullName, Party doctor, Party patientEmployer) {
+
+    public PatientSendInfoInitiator(String firstName,
+                                    String lastName,
+                                    int dose,
+                                    boolean approvedForVaccination,
+                                    Date firstDoseDate,
+                                    String firstDoseLot,
+                                    String firstDoseManufacturer,
+                                    Date secondDoseDate,
+                                    String secondDoseLot,
+                                    String secondDoseManufacturer,
+                                    boolean vaccinationProcessComplete,
+                                    Party patientFullName,
+                                    Party doctor,
+                                    Party patientEmployer,
+                                    Party clinicAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dose = dose;
+
+        this.approvedForVaccination = approvedForVaccination;
+
+        this.firstDoseDate = firstDoseDate;
+        this.firstDoseLot = firstDoseLot;
+        this.firstDoseManufacturer = firstDoseManufacturer;
+
+        this.secondDoseDate = secondDoseDate;
+        this.secondDoseLot = secondDoseLot;
+        this.secondDoseManufacturer = secondDoseManufacturer;
+
+        this.vaccinationProcessComplete = vaccinationProcessComplete;
+
         this.patientFullName = patientFullName;
         this.doctor = doctor;
         this.patientEmployer = patientEmployer;
+        this.clinicAdmin = clinicAdmin;
     }
 
     @Suspendable
@@ -58,7 +99,22 @@ public class PatientSendInfoInitiator extends FlowLogic<SignedTransaction> {
         final Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
         //Compose the State that carries the Hello World message
-        final PatientInfoState output = new PatientInfoState(firstName, lastName, dose, patientFullName, doctor, patientEmployer);
+        final PatientInfoState output =
+                new PatientInfoState(firstName,
+                                     lastName,
+                                     dose,
+                                     approvedForVaccination,
+                                     firstDoseDate,
+                                     firstDoseLot,
+                                     firstDoseManufacturer,
+                                     secondDoseDate,
+                                     secondDoseLot,
+                                     secondDoseManufacturer,
+                                     vaccinationProcessComplete,
+                                     patientFullName,
+                                     doctor,
+                                     patientEmployer,
+                                     clinicAdmin);
 
         // Step 3. Create a new TransactionBuilder object.
         final TransactionBuilder builder = new TransactionBuilder(notary);

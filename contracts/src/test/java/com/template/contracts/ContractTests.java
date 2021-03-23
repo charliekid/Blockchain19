@@ -41,16 +41,16 @@ public class ContractTests {
     //    private TokenState tokenState = new TokenState(alice.getParty(), bob.getParty(), 1);
 
     // todo: fix whatever error this is: [WARN] 05:15:15,149 [Test worker] contracts.TransactionState. - State class com.template.states.PatientInfoState belongs to contract com.template.contracts.PatientContract, but is bundled with contract com.template.contacts.PatientContract in TransactionState. Annotate PatientInfoState with @BelongsToContract(com.template.contacts.PatientContract.class) to remove this warning.
-    @Test
+    @Test(expected=AssertionError.class)
     public void tokenContractRequiresZeroInputsInTheTransaction() {
-//        transaction(ledgerServices, tx -> {
-//            // Has an input, will fail.
-//            tx.input(PatientContract.ID, patientInfoState);
-//            tx.output(PatientContract.ID, patientInfoState);
-//            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
-//            tx.fails();
-//            return null;
-//        });
+        transaction(ledgerServices, tx -> {
+            // Has an input, will fail.
+            tx.input(PatientContract.ID, patientInfoState);
+            tx.output(PatientContract.ID, patientInfoState);
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.fails();
+            return null;
+        });
 
         transaction(ledgerServices, tx -> {
             // Has no input, will verify.

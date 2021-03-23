@@ -1,0 +1,21 @@
+patient1:
+  host: localhost:10006
+  username: Patient1
+  password: test
+
+doctor1:
+  host: localhost:10009
+  username: Doctor1
+  password: test
+
+employer1:
+  host: localhost:10012
+  username: Employer1
+  password: test
+
+clinicAdmin1:
+  host: localhost:10010
+  username: ClinicAdmin1
+  password: test
+
+server.port: 8085

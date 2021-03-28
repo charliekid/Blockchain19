@@ -6,9 +6,11 @@ import net.corda.client.rpc.CordaRPCConnection;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.utilities.NetworkHostAndPort;
+import org.hibernate.annotations.ParamDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,6 +50,11 @@ public class Controller {
             System.out.println("ERROR in ASSET/LIST");
             return APIResponse.error(e.getMessage());
         }
+    }
+    @PostMapping("api/registerVaccine")
+    public String registerVaccine(String firstName,String lastName){
+
+        return "Successful";
     }
 
 

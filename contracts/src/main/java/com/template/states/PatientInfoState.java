@@ -129,6 +129,10 @@ public class PatientInfoState implements ContractState {
         return patientEmployer;
     }
 
+    public Party getClinicAdmin() {
+        return clinicAdmin;
+    }
+
     /* This method will indicate who are the participants and required signers when
      * this state is used in a transaction. */
     @Override

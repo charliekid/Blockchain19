@@ -8,9 +8,7 @@ import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.utilities.NetworkHostAndPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,13 +31,14 @@ public class Controller {
     }
 
     /**
-     * Gets the asset list pertaining to the party. In this case, this is all the transaction that
-     * is viewable by the party.
-     * @return
+     * Gets all the transactions that are in the specified party
+     * @param partyid - the partyid that correspond to the username in the db
+     * @return a json file with all the data within the node.
      */
-    @GetMapping("transaction/list")
-    public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(){
-        CordaRPCOps activeParty = connectNodeViaRPC("Patient1");
+    @GetMapping("transaction/list/{partyid}")
+    public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(@PathVariable String partyid){
+        System.out.println("partyid: " + partyid);
+        CordaRPCOps activeParty = connectNodeViaRPC(partyid);
         try{
             List<StateAndRef<PatientInfoState>> assetList = activeParty.vaultQuery(PatientInfoState.class).getStates();
             System.out.println("asset list " + assetList);
@@ -51,6 +50,22 @@ public class Controller {
     }
 
 
+
+    @GetMapping("/testingGet/{partyid}")
+    public String getAsset(@PathVariable String partyid) {
+        return partyid;
+    }
+
+    @PostMapping("/login")
+    // @RequestHeader String username, @RequestHeader String password
+    public String postLogin(@RequestBody String username ){
+        return "we are in a post /login " + username;
+    }
+
+    @PostMapping("/aPost")
+    public String apost(){
+        return "we are in a post";
+    }
     /***********************************************************************************************************
      *                                              HELPER FUNCTIONS
      ***********************************************************************************************************/

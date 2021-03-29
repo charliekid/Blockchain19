@@ -63,7 +63,7 @@ public class Controller {
 
     @PostMapping("registerVaccine")
     public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose){
-        return "Hi," + firstName + lastName + "currently recieved " + dose;
+        return "Hi," + firstName + " " + lastName + " currently recieved " + dose;
     }
     @GetMapping("transaction/list")
     public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(){

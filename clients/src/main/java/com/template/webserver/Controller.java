@@ -50,7 +50,7 @@ public class Controller {
 //    public PatientInfoState patientInfo(PatientInfoState patient){
 //        return patient;
 //    }
-
+/*
     @PostMapping("registerVaccine")
     public PatientInfoState registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader int dose,
                                   @RequestHeader Boolean approved, @RequestHeader Date firstDoseDate, @RequestHeader String firstDoselot, @RequestHeader String firstDoseMfr,
@@ -59,12 +59,12 @@ public class Controller {
 
         String date = firstDoseDate.toString();
         return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
-    }
-    /*
-    @PostMapping("registerVaccine")
-    public String registerVaccine(@RequestHeader String first, @RequestHeader String last, @RequestHeader int dose){
-        return "Hi," + first + last + "currently recieved " + dose;
     }*/
+
+    @PostMapping("registerVaccine")
+    public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose){
+        return "Hi," + firstName + lastName + "currently recieved " + dose;
+    }
     @GetMapping("transaction/list")
     public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(){
         CordaRPCOps activeParty = connectNodeViaRPC("Patient1");

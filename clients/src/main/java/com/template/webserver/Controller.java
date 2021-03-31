@@ -60,7 +60,10 @@ public class Controller {
         String date = firstDoseDate.toString();
         return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
     }*/
-
+    @PostMapping("clinicAdminApproval")
+    public String approval(){
+        return "Clinic Admin response: Approved";
+    }
     @PostMapping("registerVaccine")
     public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose){
         return "Hi," + firstName + " " + lastName + " currently recieved " + dose;

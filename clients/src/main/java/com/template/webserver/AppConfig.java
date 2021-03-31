@@ -55,8 +55,8 @@ public class AppConfig implements WebMvcConfigurer {
     @Bean(destroyMethod = "")
     public CordaRPCOps clinicAdmin1Proxy(){
         //CordaRPCClient employer1Client = new CordaRPCClient(NetworkHostAndPort.parse(clinicAdmin1HostAndPort));
-        CordaRPCClient employer1Client = new CordaRPCClient(NetworkHostAndPort.parse("localhost:10010"));
-        return employer1Client.start("ClinicAdmin1", "test").getProxy();
+        CordaRPCClient clinic1Client = new CordaRPCClient(NetworkHostAndPort.parse("localhost:10010"));
+        return clinic1Client.start("ClinicAdmin1", "test").getProxy();
     }
 
     /**

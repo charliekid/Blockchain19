@@ -94,6 +94,8 @@ public class Controller {
             return 10009;
         } else if (partyName.equals("Employer1")) {
             return 10007;
+        } else if (partyName.equals("ClinicAdmin1")) {
+            return 10010;
         } else
             return 0;
     }

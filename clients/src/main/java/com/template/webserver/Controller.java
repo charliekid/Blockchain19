@@ -109,7 +109,12 @@ public class Controller {
     private static CordaRPCOps connectNodeViaRPC(String partyName) {
         int port = getPortAddress(partyName);
         String host = "localhost";
-        String username = "user1";
+        String username = "";
+        if(partyName.equals("ClinicAdmin1")) {
+            username = "ClinicAdmin1";
+        } else {
+            username = "user1";
+        }
         String password = "test";
         NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
 

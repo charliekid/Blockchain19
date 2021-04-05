@@ -5,6 +5,9 @@ import net.corda.core.contracts.ContractState;
 import net.corda.core.flows.*;
 import net.corda.core.transactions.SignedTransaction;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static net.corda.core.contracts.ContractsDSL.requireThat;
 
 // ******************
@@ -47,12 +50,32 @@ public class PatientSendInfoResponder extends FlowLogic<SignedTransaction> {
                  * ----------
                  * For this hello-world cordapp, we will not implement any aditional checks.
                  * */
-                // TODO: Figure out how to check that there are 0 doses
                 requireThat(req -> {
+                    SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+                    Date placeholder = new Date();
+
+                    try {
+                        placeholder = parser.parse("0000-00-00");
+
+                    } catch (java.text.ParseException e) {
+                        e.printStackTrace();
+                    }
+
                     ContractState output = stx.getTx().getOutputs().get(0).getData();
                     req.using("This is for sending info to a patient.", output instanceof PatientInfoState);
                     PatientInfoState patientinfo = (PatientInfoState) output;
                     req.using("This patient must have no prior dosages.", patientinfo.getDose() == 0);
+                    req.using("Patient is not yet approved for vaccination.", !patientinfo.isApprovedForVaccination());
+
+                    //check for placeholders
+                    req.using("Patient should have no first dose date", patientinfo.getFirstDoseDate().equals(placeholder));
+                    req.using("Patient should have no first dose lot", patientinfo.getFirstDoseLot().equals("none"));
+                    req.using("Patient should have no first dose manufacturer", patientinfo.getFirstDoseManufacturer().equals("none"));
+                    req.using("Patient should have no second dose date", patientinfo.getSecondDoseDate().equals(placeholder));
+                    req.using("Patient should have no second dose lot", patientinfo.getSecondDoseLot().equals("none"));
+                    req.using("Patient should have no second dose manufacturer", patientinfo.getSecondDoseManufacturer().equals("none"));
+                    req.using("Patient's vaccination process is not complete.'", !patientinfo.isVaccinationProcessComplete());
+
                     return null;
                 });
 

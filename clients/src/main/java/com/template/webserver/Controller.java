@@ -6,13 +6,15 @@ import net.corda.client.rpc.CordaRPCConnection;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.utilities.NetworkHostAndPort;
+import org.hibernate.annotations.ParamDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import net.corda.core.identity.Party;
 
 import java.util.List;
+import java.util.Date;
+
 
 /**
  * Define your API endpoints here.
@@ -37,6 +39,32 @@ public class Controller {
      * is viewable by the party.
      * @return
      */
+
+    @PostMapping("testing")
+    public String testing(@RequestHeader String name){
+        return "Hi " + name;
+    }
+
+    //@GetMapping("patientInof")()
+//    @GetMapping("patientInfo")
+//    public PatientInfoState patientInfo(PatientInfoState patient){
+//        return patient;
+//    }
+/*
+    @PostMapping("registerVaccine")
+    public PatientInfoState registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader int dose,
+                                  @RequestHeader Boolean approved, @RequestHeader Date firstDoseDate, @RequestHeader String firstDoselot, @RequestHeader String firstDoseMfr,
+                                  @RequestHeader Date secondDate, @RequestHeader String secondDoseLot, @RequestHeader String secondMfr, @RequestHeader Boolean vaccinationProcessComplete,
+                                  @RequestHeader Party patientFullName, @RequestHeader Party doctor, @RequestHeader Party patientEmployer, @RequestHeader Party clinicAdmin){
+
+        String date = firstDoseDate.toString();
+        return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
+    }*/
+
+    @PostMapping("registerVaccine")
+    public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose){
+        return "Hi," + firstName + " " + lastName + " currently recieved " + dose;
+    }
     @GetMapping("transaction/list")
     public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(){
         CordaRPCOps activeParty = connectNodeViaRPC("Patient1");
@@ -49,7 +77,6 @@ public class Controller {
             return APIResponse.error(e.getMessage());
         }
     }
-
 
     /***********************************************************************************************************
      *                                              HELPER FUNCTIONS
@@ -67,6 +94,8 @@ public class Controller {
             return 10009;
         } else if (partyName.equals("Employer1")) {
             return 10007;
+        } else if (partyName.equals("ClinicAdmin1")) {
+            return 10010;
         } else
             return 0;
     }
@@ -80,7 +109,12 @@ public class Controller {
     private static CordaRPCOps connectNodeViaRPC(String partyName) {
         int port = getPortAddress(partyName);
         String host = "localhost";
-        String username = "user1";
+        String username = "";
+        if(partyName.equals("ClinicAdmin1")) {
+            username = "ClinicAdmin1";
+        } else {
+            username = "user1";
+        }
         String password = "test";
         NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
 

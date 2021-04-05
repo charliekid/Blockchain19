@@ -122,7 +122,7 @@ public class PatientSendInfoInitiator extends FlowLogic<SignedTransaction> {
         // Step 4. Add the iou as an output state, as well as a command to the transaction builder.
         builder.addOutputState(output);
         builder.addCommand(new PatientContract.Commands.SendInfo(),
-                Arrays.asList(this.patientFullName.getOwningKey(), this.doctor.getOwningKey(), this.patientEmployer.getOwningKey()));
+                Arrays.asList(this.patientFullName.getOwningKey(), this.doctor.getOwningKey(), this.patientEmployer.getOwningKey(), this.clinicAdmin.getOwningKey()));
 
         // Step 5. Verify and sign it with our KeyPair.
         builder.verify(getServiceHub());

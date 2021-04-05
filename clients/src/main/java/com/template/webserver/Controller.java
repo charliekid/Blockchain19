@@ -61,7 +61,7 @@ public class Controller {
         return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
     }*/
     @PostMapping("clinicAdminApproval")
-    public String approval(){
+    public String approval(@RequestParam String mfrName, @RequestParam String firstDate, @RequestParam int lotOne, @RequestParam String secDate, @RequestParam int secLot){
         return "Clinic Admin response: Approved";
     }
     @PostMapping("registerVaccine")

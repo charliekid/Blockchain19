@@ -350,7 +350,7 @@ public class FlowTests {
         assertEquals(outputPatientInfo.getDose(), 0);
     }
 
-    @Test(expected=Exception.class)
+    @Test
     public void sendInfoButThereIsOneDose() throws Exception {
         SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
         Date placeholder = new Date();

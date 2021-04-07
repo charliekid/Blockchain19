@@ -77,7 +77,7 @@ public class ContractTests {
             // Has an input, will fail.
             tx.input(PatientContract.ID, patientInfoState);
             tx.output(PatientContract.ID, patientInfoState);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.fails();
             return null;
         });
@@ -85,7 +85,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has no input, will verify.
             tx.output(PatientContract.ID, patientInfoState);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.verifies();
             return null;
         });
@@ -124,7 +124,7 @@ public class ContractTests {
             // Has two outputs, will fail.
             tx.output(PatientContract.ID, patientInfoState);
             tx.output(PatientContract.ID, patientInfoState);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.fails();
             return null;
         });
@@ -132,7 +132,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has one output, will verify.
             tx.output(PatientContract.ID, patientInfoState);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.verifies();
             return null;
         });
@@ -170,8 +170,8 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             tx.output(PatientContract.ID, patientInfoState);
             // Has two commands, will fail.
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.fails();
             return null;
         });
@@ -179,7 +179,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             tx.output(PatientContract.ID, patientInfoState);
             // Has one command, will verify.
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.verifies();
             return null;
         });
@@ -217,7 +217,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has wrong output type, will fail.
             tx.output(PatientContract.ID, new DummyState());
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.fails();
             return null;
         });
@@ -225,7 +225,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has correct output type, will verify.
             tx.output(PatientContract.ID, patientInfoState);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.verifies();
             return null;
         });
@@ -296,7 +296,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has one dose, will fail.
             tx.output(PatientContract.ID, oneDose);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.fails();
             return null;
         });
@@ -304,7 +304,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has two dose, will fail.
             tx.output(PatientContract.ID, twoDose);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.fails();
             return null;
         });
@@ -312,7 +312,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has no dose, will verify.
             tx.output(PatientContract.ID, zeroDose);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.verifies();
             return null;
         });
@@ -350,7 +350,7 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has wrong command type, will fail.
             tx.output(PatientContract.ID, patientInfoState);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), DummyCommandData.INSTANCE);
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), DummyCommandData.INSTANCE);
             tx.fails();
             return null;
         });
@@ -358,8 +358,72 @@ public class ContractTests {
         transaction(ledgerServices, tx -> {
             // Has correct command type, will verify.
             tx.output(PatientContract.ID, patientInfoState);
-            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey()), new PatientContract.Commands.SendInfo());
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.SendInfo());
             tx.verifies();
+            return null;
+        });
+    }
+
+    //testing for the ApprovePatient command
+    @Test
+    public void patientContractForApprovePatientRequiresOneInputInTheTransaction() {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date placeholder = new Date();
+
+        try {
+            placeholder = parser.parse("0000-00-00");
+
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+
+        PatientInfoState inputPatientInfoState = new PatientInfoState("marc",
+                "alejandro",
+                0,
+                false,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                marc.getParty(),
+                jorge.getParty(),
+                charlie.getParty(),
+                jonathan.getParty());
+
+        PatientInfoState outputPatientInfoState = new PatientInfoState("marc",
+                "alejandro",
+                0,
+                true,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                marc.getParty(),
+                jorge.getParty(),
+                charlie.getParty(),
+                jonathan.getParty());
+
+        transaction(ledgerServices, tx -> {
+            // Has an input, will verify.
+            tx.input(PatientContract.ID, inputPatientInfoState);
+            tx.output(PatientContract.ID, outputPatientInfoState);
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.ApprovePatient());
+            tx.verifies();
+            return null;
+        });
+
+        transaction(ledgerServices, tx -> {
+            // Has no input, will fail.
+            tx.output(PatientContract.ID, outputPatientInfoState);
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.ApprovePatient());
+            tx.fails();
             return null;
         });
     }

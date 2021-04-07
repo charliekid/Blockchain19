@@ -1,6 +1,5 @@
 package com.template.contracts;
 import com.template.states.PatientInfoState;
-import com.template.states.TemplateState;
 import net.corda.core.contracts.CommandData;
 import net.corda.core.contracts.CommandWithParties;
 import net.corda.core.contracts.Contract;
@@ -59,27 +58,50 @@ public class PatientContract implements Contract {
 //                require.using("Patient should have no first dose manufacturer", output.getFirstDoseManufacturer().equals("none"));
 //                require.using("Patient should have no second dose date", output.getSecondDoseDate().equals(placeholder));
 //                require.using("Patient should have no second dose lot", output.getSecondDoseLot().equals("none"));
-//                require.using("Patient should have no second dose manufacturer", output.getSecondDoseManufacturer().equals("none"));
-//                require.using("Patient's vaccination process is not complete.'", !output.isVaccinationProcessComplete());
+//                require.using("Patient should have no second dose manufacturer", output.getSecondDoseManufacturer().equals("none"));=
+                require.using("Patient's vaccination process is not complete.'", !output.isVaccinationProcessComplete());
 
                 return null;
             });
 
-        } else {
+        } else if (command.getValue() instanceof Commands.ApprovePatient) {
+            SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+            Date placeholder = new Date();
+
+            try {
+                placeholder = parser.parse("0000-00-00");
+
+            } catch (java.text.ParseException e) {
+                e.printStackTrace();
+            }
+
+            //Retrieve the output state of the transaction
+            PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
+
+            //Retrieve the output state of the transaction
+            PatientInfoState input = tx.inputsOfType(PatientInfoState.class).get(0);
+            //Using Corda DSL function requireThat to replicate conditions-checks
+            requireThat(require -> {
+                require.using("Information for a singular must be consumed as input.", tx.getInputStates().size() == 1);
+
+                //check input
+                require.using("Incoming patient must have no prior dosages.", input.getDose() == 0);
+                require.using("Incoming patient's vaccination process is not complete.'", !input.isVaccinationProcessComplete());
+                require.using("Incoming patient is not yet approved for vaccination.", !input.isApprovedForVaccination());
+
+                //check output
+                require.using("Patient must have no prior dosages.", output.getDose() == 0);
+                require.using("Patient's vaccination process is not complete.'", !output.isVaccinationProcessComplete());
+                require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
+                return null;
+            });
+        }
+
+        else {
             throw new IllegalArgumentException("Unrecognized command.");
         }
-//
-//        if (commandData.equals(new PatientContract.Commands.SendInfo())) {
-//            //Retrieve the output state of the transaction
-//            PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
-//
-//            //Using Corda DSL function requireThat to replicate conditions-checks
-//            requireThat(require -> {
-//                require.using("No inputs should be consumed when sending just the patient information", tx.getInputStates().size() == 0);
-//                require.using("Patient should currently not have any doses", output.getDose() != 0);
-//                return null;
-//            });
-//        }
+
+
 //
 //        // todo: modify the above template for the commands accordingly for inputs
 //        if (commandData.equals(new PatientContract.Commands.ApprovePatient())) {

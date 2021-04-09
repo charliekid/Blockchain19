@@ -62,10 +62,10 @@ public class Controller {
     }*/
     @PostMapping("clinicAdminApproval")
     public String approval(@RequestHeader String mfrName, @RequestHeader String firstDate, @RequestHeader int lotOne, @RequestHeader String secDate, @RequestHeader int secLot){
-        return "Clinic Admin response: Approved";
+        return "Vaccine manufacturer: " + mfrName + " Date1: " + firstDate +  " Lot1: " + lotOne + " Date2: "+ secDate+ " Lot2: " +secLot;
     }
     @PostMapping("registerVaccine")
-    public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose){
+    public String registerVaccine(@RequestParam String firstName, @RequestParam String lastName, @RequestParam int dose, @RequestParam String user){
         return "Hi," + firstName + " " + lastName + " currently recieved " + dose;
     }
     @GetMapping("transaction/list")

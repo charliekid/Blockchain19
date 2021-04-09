@@ -2,6 +2,7 @@ package com.template;
 
 import com.google.common.collect.ImmutableList;
 import com.template.contracts.PatientContract;
+import com.template.flows.ApprovePatientInitiator;
 import com.template.flows.PatientSendInfoInitiator;
 import com.template.flows.PatientSendInfoResponder;
 import com.template.flows.Responder;
@@ -344,8 +345,122 @@ public class FlowTests {
         SignedTransaction signedTransaction = future.get();
 
 //        signedTransaction.getTx().getOutputs().get(0).getData()
-        // assert equals some stuf here.
+        // assert equals some stuff here.
+        PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
+        assertEquals(outputPatientInfo.getDose(), 0);
     }
+
+    @Test
+    public void sendInfoButThereIsOneDose() throws Exception {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date placeholder = new Date();
+
+        try {
+            placeholder = parser.parse("0000-00-00");
+
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("marc",
+                "alejandro",
+                1,
+                false,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+
+        CordaFuture<SignedTransaction> future = a.startFlow(flow);
+        network.runNetwork(); // expects a failure
+    }
+
+    @Test
+    public void sendInfoToDoctorThenApprovePatientForVaccination() throws Exception {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date placeholder = new Date();
+
+        try {
+            placeholder = parser.parse("0000-00-00");
+
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
+                "alejandro",
+                0,
+                false,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+
+        CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction = future.get();
+
+//        signedTransaction.getTx().getOutputs().get(0).getData()
+        // assert equals some stuff here.
+        PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
+        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+
+        ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
+                "alejandro",
+                0,
+                true,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction2 = future2.get();
+
+
+        PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
+        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+    }
+
+    @Test
+    public void theWholeProcess() {
+
+    }
+
+
+
 
 
 

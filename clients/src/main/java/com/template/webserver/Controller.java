@@ -1,5 +1,6 @@
 package com.template.webserver;
 
+import com.template.flows.PatientSendInfoInitiator;
 import com.template.states.PatientInfoState;
 import net.corda.client.rpc.CordaRPCClient;
 import net.corda.client.rpc.CordaRPCConnection;
@@ -60,20 +61,33 @@ public class Controller {
         String date = firstDoseDate.toString();
         return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
     }*/
-    @PostMapping("clinicAdminApproval")
-    public String approval(@RequestHeader String mfrName, @RequestHeader String firstDate, @RequestHeader int lotOne, @RequestHeader String secDate, @RequestHeader int secLot){
-        return "Vaccine manufacturer: " + mfrName + " Date1: " + firstDate +  " Lot1: " + lotOne + " Date2: "+ secDate+ " Lot2: " +secLot;
-    }
+
     @PostMapping("registerVaccine")
-    public String registerVaccine(@RequestParam String firstName, @RequestParam String lastName, @RequestParam int dose, @RequestParam String user){
+    public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose, @RequestHeader String username){
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
+        // We need to get all the parties identies.
+        Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
+        Party doctorNodes = connectNodeViaRPC("Doctor1").nodeInfo().getLegalIdentities().get(0);
+        Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
+        Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
+
+//        PatientSendInfoInitiator flow = new PatientSendInfoInitiator(firstName, lastName, 0, false,
+//                                new Date(0000-00-00), "none", "none",
+//                                new Date(0000-00-00), "none", "none",
+//                false, patientNode, doctorNodes, employerNode, clinicAdmin1);
+        activeParty.startFlowDynamic(PatientSendInfoInitiator.class, firstName, lastName, 0, false,
+                new Date(0000-00-00), "none", "none",
+                new Date(0000-00-00), "none", "none",
+                false, patientNode, doctorNodes, employerNode, clinicAdmin1);
         return "Hi," + firstName + " " + lastName + " currently recieved " + dose;
+
     }
-    @GetMapping("transaction/list")
-    public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(){
-        CordaRPCOps activeParty = connectNodeViaRPC("Patient1");
+
+    @GetMapping("transaction/list/{username}")
+    public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(@PathVariable String username){
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
         try{
             List<StateAndRef<PatientInfoState>> assetList = activeParty.vaultQuery(PatientInfoState.class).getStates();
-            System.out.println("asset list " + assetList);
             return APIResponse.success(assetList);
         }catch(Exception e){
             System.out.println("ERROR in ASSET/LIST");
@@ -112,7 +126,12 @@ public class Controller {
     private static CordaRPCOps connectNodeViaRPC(String partyName) {
         int port = getPortAddress(partyName);
         String host = "localhost";
-        String username = "user1";
+        String username = "";
+        if(partyName.equals("ClinicAdmin1")) {
+            username = "ClinicAdmin1";
+        } else {
+            username = "user1";
+        }
         String password = "test";
         NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
 

@@ -47,12 +47,14 @@ public class PatientSendInfoResponder extends FlowLogic<SignedTransaction> {
                  * ----------
                  * For this hello-world cordapp, we will not implement any aditional checks.
                  * */
-                // TODO: Figure out how to check that there are 0 doses
+
                 requireThat(req -> {
                     ContractState output = stx.getTx().getOutputs().get(0).getData();
                     req.using("This is for sending info to a patient.", output instanceof PatientInfoState);
                     PatientInfoState patientinfo = (PatientInfoState) output;
                     req.using("This patient must have no prior dosages.", patientinfo.getDose() == 0);
+                    req.using("Patient is not yet approved for vaccination.", !patientinfo.isApprovedForVaccination());
+                    req.using("Patient's vaccination process is not complete.'", !patientinfo.isVaccinationProcessComplete());
                     return null;
                 });
 

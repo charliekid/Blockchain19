@@ -1,5 +1,6 @@
 package com.template.webserver;
 
+import com.template.flows.PatientSendInfoInitiator;
 import com.template.states.PatientInfoState;
 import net.corda.client.rpc.CordaRPCClient;
 import net.corda.client.rpc.CordaRPCConnection;
@@ -62,15 +63,31 @@ public class Controller {
     }*/
 
     @PostMapping("registerVaccine")
-    public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose){
+    public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose, @RequestHeader String username){
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
+        // We need to get all the parties identies.
+        Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
+        Party doctorNodes = connectNodeViaRPC("Doctor1").nodeInfo().getLegalIdentities().get(0);
+        Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
+        Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
+
+//        PatientSendInfoInitiator flow = new PatientSendInfoInitiator(firstName, lastName, 0, false,
+//                                new Date(0000-00-00), "none", "none",
+//                                new Date(0000-00-00), "none", "none",
+//                false, patientNode, doctorNodes, employerNode, clinicAdmin1);
+        activeParty.startFlowDynamic(PatientSendInfoInitiator.class, firstName, lastName, 0, false,
+                new Date(0000-00-00), "none", "none",
+                new Date(0000-00-00), "none", "none",
+                false, patientNode, doctorNodes, employerNode, clinicAdmin1);
         return "Hi," + firstName + " " + lastName + " currently recieved " + dose;
+
     }
-    @GetMapping("transaction/list")
-    public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(){
-        CordaRPCOps activeParty = connectNodeViaRPC("Patient1");
+
+    @GetMapping("transaction/list/{username}")
+    public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(@PathVariable String username){
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
         try{
             List<StateAndRef<PatientInfoState>> assetList = activeParty.vaultQuery(PatientInfoState.class).getStates();
-            System.out.println("asset list " + assetList);
             return APIResponse.success(assetList);
         }catch(Exception e){
             System.out.println("ERROR in ASSET/LIST");

@@ -1,5 +1,6 @@
 package com.template.webserver;
 
+import com.template.flows.ApprovePatientInitiator;
 import com.template.flows.PatientSendInfoInitiator;
 import com.template.states.PatientInfoState;
 import net.corda.client.rpc.CordaRPCClient;
@@ -61,6 +62,21 @@ public class Controller {
         String date = firstDoseDate.toString();
         return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
     }*/
+    @PostMapping("clinicAdminApproval")
+    public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName, @RequestHeader String firstDate, @RequestHeader String lotOne, @RequestHeader String secDate, @RequestHeader String secLot, @RequestHeader String username ){
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
+        // We need to get all the parties identies.
+        Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
+        Party doctorNodes = connectNodeViaRPC("Doctor1").nodeInfo().getLegalIdentities().get(0);
+        Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
+        Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
+
+        activeParty.startFlowDynamic(ApprovePatientInitiator.class, firstName, lastName,0,false,firstDate, lotOne,mfrName,
+                secDate,secLot,mfrName,false,patientNode, doctorNodes,employerNode,clinicAdmin1);
+
+
+        return "Sent";
+    }
 
     @PostMapping("registerVaccine")
     public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose, @RequestHeader String username){

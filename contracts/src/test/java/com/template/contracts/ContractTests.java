@@ -428,6 +428,80 @@ public class ContractTests {
         });
     }
 
+    //administerfirstdose
+
+    @Test
+    public void patientContractForAdministerFirstDoseRequiresOneInputInTheTransaction() {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date placeholder = new Date();
+
+        try {
+            placeholder = parser.parse("0000-00-00");
+
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        Date firstDoseDate = new Date();
+
+        try {
+            firstDoseDate = parser.parse("2021-03-03");
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+
+        PatientInfoState inputPatientInfoState = new PatientInfoState("marc",
+                "alejandro",
+                0,
+                true,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                marc.getParty(),
+                jorge.getParty(),
+                charlie.getParty(),
+                jonathan.getParty());
+
+        PatientInfoState outputPatientInfoState = new PatientInfoState("marc",
+                "alejandro",
+                1,
+                true,
+                firstDoseDate,
+                "123a45b",
+                "pfizer",
+                placeholder,
+                "none",
+                "none",
+                false,
+                marc.getParty(),
+                jorge.getParty(),
+                charlie.getParty(),
+                jonathan.getParty());
+
+        transaction(ledgerServices, tx -> {
+            // Has an input, will verify.
+            tx.input(PatientContract.ID, inputPatientInfoState);
+            tx.output(PatientContract.ID, outputPatientInfoState);
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.AdministerFirstDose());
+            tx.verifies();
+            return null;
+        });
+
+        transaction(ledgerServices, tx -> {
+            // Has no input, will fail.
+            tx.output(PatientContract.ID, outputPatientInfoState);
+            tx.command(Arrays.asList(marc.getPublicKey(), jorge.getPublicKey(), charlie.getPublicKey(), jonathan.getPublicKey()), new PatientContract.Commands.AdministerFirstDose());
+            tx.fails();
+            return null;
+        });
+    }
+
+
 
 //    @Test
 //    public void tokenContractRequiresTheIssuerToBeARequiredSignerInTheTransaction() {

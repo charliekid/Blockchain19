@@ -58,31 +58,22 @@ public class PatientContract implements Contract {
 //                require.using("Patient should have no first dose manufacturer", output.getFirstDoseManufacturer().equals("none"));
 //                require.using("Patient should have no second dose date", output.getSecondDoseDate().equals(placeholder));
 //                require.using("Patient should have no second dose lot", output.getSecondDoseLot().equals("none"));
-//                require.using("Patient should have no second dose manufacturer", output.getSecondDoseManufacturer().equals("none"));=
+//                require.using("Patient should have no second dose manufacturer", output.getSecondDoseManufacturer().equals("none"));
                 require.using("Patient's vaccination process is not complete.'", !output.isVaccinationProcessComplete());
 
                 return null;
             });
 
         } else if (command.getValue() instanceof Commands.ApprovePatient) {
-            SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
-            Date placeholder = new Date();
-
-            try {
-                placeholder = parser.parse("0000-00-00");
-
-            } catch (java.text.ParseException e) {
-                e.printStackTrace();
-            }
-
             //Retrieve the output state of the transaction
             PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
 
-            //Retrieve the output state of the transaction
+            //Retrieve the input state of the transaction
             PatientInfoState input = tx.inputsOfType(PatientInfoState.class).get(0);
+
             //Using Corda DSL function requireThat to replicate conditions-checks
             requireThat(require -> {
-                require.using("Information for a singular must be consumed as input.", tx.getInputStates().size() == 1);
+                require.using("Information for a singular patient must be consumed as input.", tx.getInputStates().size() == 1);
 
                 //check input
                 require.using("Incoming patient must have no prior dosages.", input.getDose() == 0);
@@ -95,6 +86,48 @@ public class PatientContract implements Contract {
                 require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
                 return null;
             });
+        } else if (command.getValue() instanceof Commands.AdministerFirstDose) { // todo: modify the above template for the commands accordingly for inputs
+            //Retrieve the output state of the transaction
+            PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
+
+            //Retrieve the input state of the transaction
+            PatientInfoState input = tx.inputsOfType(PatientInfoState.class).get(0);
+
+            //Using Corda DSL function requireThat to replicate conditions-checks
+            requireThat(require -> {
+                SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+                Date placeholder = new Date();
+
+                try {
+                    placeholder = parser.parse("0000-00-00");
+
+                } catch (java.text.ParseException e) {
+                    e.printStackTrace();
+                }
+
+                require.using("Information for a singular patient must be consumed as input.", tx.getInputStates().size() == 1);
+
+                //check input
+                require.using("Incoming patient must have no prior dosages.", input.getDose() == 0);
+                require.using("Incoming patient's vaccination process is not complete.", !input.isVaccinationProcessComplete());
+                require.using("Patient should now be ready for vaccination.", input.isApprovedForVaccination());
+
+                //check output
+                require.using("Patient must have a singular dose.", output.getDose() == 1);
+                require.using("Patient's vaccination process is not complete.", !output.isVaccinationProcessComplete());
+                require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
+
+
+
+                //todo: check for lot numbers and dates
+
+                require.using("Lot number required.", !(output.getFirstDoseLot().isEmpty() || output.getFirstDoseLot().equalsIgnoreCase("none")));
+                require.using("Manufacturer required.", !(output.getFirstDoseManufacturer().isEmpty() || output.getFirstDoseManufacturer().equalsIgnoreCase("none")));
+                /* check date here*/
+//                require.using("Date required.", !(output.getFirstDoseDate().equals(placeholder)));
+
+                return null;
+            });
         }
 
         else {
@@ -102,21 +135,7 @@ public class PatientContract implements Contract {
         }
 
 
-//
-//        // todo: modify the above template for the commands accordingly for inputs
-//        if (commandData.equals(new PatientContract.Commands.ApprovePatient())) {
-//            //Retrieve the output state of the transaction
-//            PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
-//
-//            //Using Corda DSL function requireThat to replicate conditions-checks
-//            requireThat(require -> {
-////                require.using("No inputs should be consumed when sending just the patient information", tx.getInputStates().size() == 0);
-//
-//
-//                require.using("Patient should currently not have any doses", output.getDose() != 0);
-//                return null;
-//            });
-//        }
+
 //
 //        // todo: modify the above template for the commands accordingly for inputs
 //        if (commandData.equals(new PatientContract.Commands.AdministerFirstDose())) {

@@ -12,7 +12,7 @@ import static net.corda.core.contracts.ContractsDSL.requireThat;
 // ******************
 @InitiatedBy(ApprovePatientInitiator.class)
 
-public class ApprovePatientResponder extends FlowLogic<SignedTransaction>  {
+public class ApprovePatientResponder extends FlowLogic<SignedTransaction> {
 
     //private variable
     private FlowSession counterpartySession;

@@ -2,10 +2,7 @@ package com.template;
 
 import com.google.common.collect.ImmutableList;
 import com.template.contracts.PatientContract;
-import com.template.flows.ApprovePatientInitiator;
-import com.template.flows.PatientSendInfoInitiator;
-import com.template.flows.PatientSendInfoResponder;
-import com.template.flows.Responder;
+import com.template.flows.*;
 import com.template.states.PatientInfoState;
 import net.corda.core.concurrent.CordaFuture;
 import net.corda.core.contracts.Command;
@@ -25,6 +22,7 @@ import org.junit.Test;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 
@@ -55,6 +53,8 @@ public class FlowTests {
 //        // For real nodes this happens automatically, but we have to manually register the flow for tests.
         for (StartedMockNode node : ImmutableList.of(a, b, c, d)) {
             node.registerInitiatedFlow(PatientSendInfoResponder.class);
+            node.registerInitiatedFlow(ApprovePatientResponder.class);
+            node.registerInitiatedFlow(AdministerFirstDoseResponder.class);
             // other responders here
 //
         }
@@ -350,7 +350,40 @@ public class FlowTests {
         assertEquals(outputPatientInfo.getDose(), 0);
     }
 
-    @Test
+    @Test(expected = ExecutionException.class)
+    public void nonPatientPartySendsInfoToDoctor() throws Exception {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date placeholder = new Date();
+
+        try {
+            placeholder = parser.parse("0000-00-00");
+
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("marc",
+                "alejandro",
+                0,
+                false,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        CordaFuture<SignedTransaction> future = b.startFlow(flow);
+        network.runNetwork(); // expects a failure
+        SignedTransaction signedTransaction = future.get();
+    }
+
+    @Test(expected = ExecutionException.class)
     public void sendInfoButThereIsOneDose() throws Exception {
         SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
         Date placeholder = new Date();
@@ -385,6 +418,7 @@ public class FlowTests {
 
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork(); // expects a failure
+        SignedTransaction signedTransaction = future.get();
     }
 
     @Test
@@ -453,6 +487,246 @@ public class FlowTests {
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
         assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
     }
+
+    @Test(expected = ExecutionException.class)
+    public void sendInfoToDoctorThenApproveNonexistentPatientForVaccination() throws Exception {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date placeholder = new Date();
+
+        try {
+            placeholder = parser.parse("0000-00-00");
+
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
+                "alejandro",
+                0,
+                false,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+
+        CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction = future.get();
+
+//        signedTransaction.getTx().getOutputs().get(0).getData()
+        // assert equals some stuff here.
+        PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
+        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+
+        ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("charlie",
+                "nguyen",
+                0,
+                true,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction2 = future2.get();
+    }
+
+    @Test(expected = ExecutionException.class)
+    public void sendInfoToDoctorButSomeoneWhoIsNotADoctorTriesToApprovePatientForVaccination() throws Exception {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date placeholder = new Date();
+
+        try {
+            placeholder = parser.parse("0000-00-00");
+
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
+                "alejandro",
+                0,
+                false,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction = future.get();
+
+//        signedTransaction.getTx().getOutputs().get(0).getData()
+        // assert equals some stuff here.
+        PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
+        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+
+        ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
+                "alejandro",
+                0,
+                true,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        CordaFuture<SignedTransaction> future2 = a.startFlow(approvePatientFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction2 = future2.get();
+    }
+
+
+    @Test
+    public void sendInfoApprovePatientThenAdministerFirstDose() throws Exception {
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date placeholder = new Date();
+
+        try {
+            placeholder = parser.parse("0000-00-00");
+
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+
+        PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
+                "alejandro",
+                0,
+                false,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction = future.get();
+
+//        signedTransaction.getTx().getOutputs().get(0).getData()
+        // assert equals some stuff here.
+        PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
+        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+
+        ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
+                "alejandro",
+                0,
+                true,
+                placeholder,
+                "none",
+                "none",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction2 = future2.get();
+
+
+        PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
+        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+
+        assertEquals(1, signedTransaction2.getTx().getOutputStates().size());
+        System.out.println("shit");
+
+        //todo: make sure approvepatientinitiator.java actually puts something inside the vault
+
+        Date firstDoseDate = new Date();
+
+        try {
+            firstDoseDate = parser.parse("2021-03-03");
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+//
+//
+//        CordaFuture<SignedTransaction> future3 = d.startFlow(sendInfoFlow2);
+//        network.runNetwork();
+//        SignedTransaction signedTransaction3 = future3.get();
+//
+//        PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
+
+
+
+
+
+        AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
+                "alejandro",
+                1,
+                true,
+                firstDoseDate,
+                "123a45b",
+                "moderna",
+                placeholder,
+                "none",
+                "none",
+                false,
+                a.getInfo().getLegalIdentities().get(0),
+                b.getInfo().getLegalIdentities().get(0),
+                c.getInfo().getLegalIdentities().get(0),
+                d.getInfo().getLegalIdentities().get(0));
+
+        CordaFuture<SignedTransaction> future4 = d.startFlow(administerFirstDoseFlow);
+        network.runNetwork();
+        SignedTransaction signedTransaction4 = future4.get();
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Test
     public void theWholeProcess() {

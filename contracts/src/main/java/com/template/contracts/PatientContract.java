@@ -53,10 +53,10 @@ public class PatientContract implements Contract {
                 require.using("Patient is not yet approved for vaccination.", !output.isApprovedForVaccination());
 
                 //check for placeholders
-                require.using("Patient should have no first dose date", output.getFirstDoseDate().equals(placeholder));
+//                require.using("Patient should have no first dose date", output.getFirstDoseDate().equals(placeholder));
                 require.using("Patient should have no first dose lot", output.getFirstDoseLot().equals("none"));
                 require.using("Patient should have no first dose manufacturer", output.getFirstDoseManufacturer().equals("none"));
-                require.using("Patient should have no second dose date", output.getSecondDoseDate().equals(placeholder));
+//                require.using("Patient should have no second dose date", output.getSecondDoseDate().equals(placeholder));
                 require.using("Patient should have no second dose lot", output.getSecondDoseLot().equals("none"));
                 require.using("Patient should have no second dose manufacturer", output.getSecondDoseManufacturer().equals("none"));
                 require.using("Patient's vaccination process is not complete.'", !output.isVaccinationProcessComplete());

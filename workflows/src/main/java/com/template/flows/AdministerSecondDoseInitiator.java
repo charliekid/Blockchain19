@@ -3,17 +3,12 @@ package com.template.flows;
 import co.paralleluniverse.fibers.Suspendable;
 import com.template.contracts.PatientContract;
 import com.template.states.PatientInfoState;
-import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
-import net.corda.core.node.ServiceHub;
-import net.corda.core.node.services.*;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
-
-
 
 import java.util.Arrays;
 import java.util.Date;
@@ -26,7 +21,7 @@ import java.util.stream.Collectors;
 @InitiatingFlow
 @StartableByRPC
 
-public class AdministerFirstDoseInitiator extends FlowLogic<SignedTransaction>  {
+public class AdministerSecondDoseInitiator extends FlowLogic<SignedTransaction>  {
 
 
     // We will not use these ProgressTracker for this Hello-World sample
@@ -58,21 +53,21 @@ public class AdministerFirstDoseInitiator extends FlowLogic<SignedTransaction>  
     private final Party patientEmployer;
     private final Party clinicAdmin;
 
-    public AdministerFirstDoseInitiator(String firstName,
-                                   String lastName,
-                                   int dose,
-                                   boolean approvedForVaccination,
-                                   Date firstDoseDate,
-                                   String firstDoseLot,
-                                   String firstDoseManufacturer,
-                                   Date secondDoseDate,
-                                   String secondDoseLot,
-                                   String secondDoseManufacturer,
-                                   boolean vaccinationProcessComplete,
-                                   Party patientFullName,
-                                   Party doctor,
-                                   Party patientEmployer,
-                                   Party clinicAdmin) {
+    public AdministerSecondDoseInitiator(String firstName,
+                                         String lastName,
+                                         int dose,
+                                         boolean approvedForVaccination,
+                                         Date firstDoseDate,
+                                         String firstDoseLot,
+                                         String firstDoseManufacturer,
+                                         Date secondDoseDate,
+                                         String secondDoseLot,
+                                         String secondDoseManufacturer,
+                                         boolean vaccinationProcessComplete,
+                                         Party patientFullName,
+                                         Party doctor,
+                                         Party patientEmployer,
+                                         Party clinicAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dose = dose;
@@ -127,8 +122,8 @@ public class AdministerFirstDoseInitiator extends FlowLogic<SignedTransaction>  
 //        }
 
         // check for any prior dosages
-        if (inputPatientInfoState.getDose() >= 1) {
-            throw new IllegalArgumentException("The patient has already received their first dose.");
+        if (inputPatientInfoState.getDose() == 2) {
+            throw new IllegalArgumentException("The patient has already received their second dose.");
         }
 
         //Compose the State that carries the Hello World message
@@ -155,7 +150,7 @@ public class AdministerFirstDoseInitiator extends FlowLogic<SignedTransaction>  
         // Step 4. Add the iou as an output state, as well as a command to the transaction builder.
         builder.addInputState(inputPatientInfoStateAndRef);
         builder.addOutputState(output);
-        builder.addCommand(new PatientContract.Commands.AdministerFirstDose(),
+        builder.addCommand(new PatientContract.Commands.AdministerSecondDose(),
                 Arrays.asList(this.patientFullName.getOwningKey(), this.doctor.getOwningKey(), this.patientEmployer.getOwningKey(), this.clinicAdmin.getOwningKey()));
 
         // Step 5. Verify and sign it with our KeyPair.

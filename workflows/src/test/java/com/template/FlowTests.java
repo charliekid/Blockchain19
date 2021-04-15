@@ -34,6 +34,7 @@ public class FlowTests {
     private final TestIdentity charlie = new TestIdentity(new CordaX500Name("Charlie", "", "GB"));
     private final TestIdentity jorge = new TestIdentity(new CordaX500Name("Jorge", "", "GB"));
     private final TestIdentity marc = new TestIdentity(new CordaX500Name("Marc", "", "GB"));
+    private final TestIdentity jonathan = new TestIdentity(new CordaX500Name("Jonathan", "", "GB"));
 
     @Before
     public void setup() {
@@ -49,14 +50,13 @@ public class FlowTests {
         startedNodes.add(b);
         startedNodes.add(c);
         startedNodes.add(d);
-//
-//        // For real nodes this happens automatically, but we have to manually register the flow for tests.
+
+        // For real nodes this happens automatically, but we have to manually register the flow for tests.
         for (StartedMockNode node : ImmutableList.of(a, b, c, d)) {
             node.registerInitiatedFlow(PatientSendInfoResponder.class);
             node.registerInitiatedFlow(ApprovePatientResponder.class);
             node.registerInitiatedFlow(AdministerFirstDoseResponder.class);
             // other responders here
-//
         }
         network.runNetwork();
     }
@@ -319,6 +319,11 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+
         PatientSendInfoInitiator flow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -330,15 +335,11 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
-        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
-        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
-        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
-        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork();
@@ -362,6 +363,11 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+
         PatientSendInfoInitiator flow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -373,10 +379,10 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
         CordaFuture<SignedTransaction> future = b.startFlow(flow);
         network.runNetwork(); // expects a failure
@@ -618,6 +624,11 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -629,10 +640,10 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
@@ -654,12 +665,12 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
-        CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
+        CordaFuture<SignedTransaction> future2 = d.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
@@ -679,15 +690,17 @@ public class FlowTests {
         } catch (java.text.ParseException e) {
             e.printStackTrace();
         }
-//
-//
-//        CordaFuture<SignedTransaction> future3 = d.startFlow(sendInfoFlow2);
-//        network.runNetwork();
-//        SignedTransaction signedTransaction3 = future3.get();
-//
-//        PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
+        assertEquals(1, signedTransaction2.getTx().getInputs().size());
+        // The single attachment is the contract attachment.
+        assertEquals(1, signedTransaction2.getTx().getAttachments().size());
+        Command command = signedTransaction2.getTx().getCommands().get(0);
 
+        assertEquals(4, command.getSigners().size());
+        assertTrue(command.getSigners().contains(a.getInfo().getLegalIdentities().get(0).getOwningKey()));
+        assertTrue(command.getSigners().contains(b.getInfo().getLegalIdentities().get(0).getOwningKey()));
+        assertTrue(command.getSigners().contains(c.getInfo().getLegalIdentities().get(0).getOwningKey()));
+        assertTrue(command.getSigners().contains(d.getInfo().getLegalIdentities().get(0).getOwningKey()));
 
 
 
@@ -702,14 +715,16 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
-        CordaFuture<SignedTransaction> future4 = d.startFlow(administerFirstDoseFlow);
+        CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
-        SignedTransaction signedTransaction4 = future4.get();
+        SignedTransaction signedTransaction4 = future3.get();
+
+
 
     }
 

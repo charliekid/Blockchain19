@@ -14,8 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import net.corda.core.identity.Party;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 
 /**
@@ -63,7 +66,7 @@ public class Controller {
         return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
     }*/
     @PostMapping("clinicAdminApproval")
-    public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName, @RequestHeader String firstDate, @RequestHeader String lotOne, @RequestHeader String secDate, @RequestHeader String secLot, @RequestHeader String username ){
+    public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName, @RequestHeader String firstDate, @RequestHeader String lotOne, @RequestHeader String secDate, @RequestHeader String secLot, @RequestHeader String username ) throws ParseException {
         CordaRPCOps activeParty = connectNodeViaRPC(username);
         // We need to get all the parties identies.
         Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
@@ -71,8 +74,12 @@ public class Controller {
         Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
         Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
 
-        activeParty.startFlowDynamic(ApprovePatientInitiator.class, firstName, lastName,0,false,firstDate, lotOne,mfrName,
-                secDate,secLot,mfrName,false,patientNode, doctorNodes,employerNode,clinicAdmin1);
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+        Date firDate = df.parse(firstDate);
+        Date secondDate = df.parse(secDate);
+
+        activeParty.startFlowDynamic(ApprovePatientInitiator.class, firstName, lastName,1,false,firDate, lotOne,mfrName,
+                secondDate,secLot,mfrName,false,patientNode, doctorNodes,employerNode,clinicAdmin1);
 
 
         return "Patient: " + firstName + "is approved for first vaccine";

@@ -670,7 +670,7 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
-        CordaFuture<SignedTransaction> future2 = d.startFlow(approvePatientFlow);
+        CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 

@@ -31,6 +31,7 @@ public class StateTests {
         assertEquals(marc.getParty(), patientInfoState.getPatientFullName());
         assertEquals(jorge.getParty(), patientInfoState.getDoctor());
         assertEquals(charlie.getParty(), patientInfoState.getPatientEmployer());
+        assertEquals(jonathan.getParty(), patientInfoState.getClinicAdmin());
     }
 //
     @Test

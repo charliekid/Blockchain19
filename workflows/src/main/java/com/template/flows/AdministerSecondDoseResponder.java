@@ -10,15 +10,15 @@ import static net.corda.core.contracts.ContractsDSL.requireThat;
 // ******************
 // * Responder flow *
 // ******************
-@InitiatedBy(AdministerFirstDoseInitiator.class)
+@InitiatedBy(AdministerSecondDoseInitiator.class)
 
-public class AdministerFirstDoseResponder extends FlowLogic<SignedTransaction>  {
+public class AdministerSecondDoseResponder extends FlowLogic<SignedTransaction>  {
 
     //private variable
     private FlowSession counterpartySession;
 
     //Constructor
-    public AdministerFirstDoseResponder(FlowSession counterpartySession) {
+    public AdministerSecondDoseResponder(FlowSession counterpartySession) {
         this.counterpartySession = counterpartySession;
     }
 
@@ -54,11 +54,14 @@ public class AdministerFirstDoseResponder extends FlowLogic<SignedTransaction>  
 
                     req.using("This is for sending info.", output instanceof PatientInfoState);
                     PatientInfoState patientinfo = (PatientInfoState) output;
-                    req.using("This patient must have one dose.", patientinfo.getDose() == 1);
+                    req.using("This patient must have two doses.", patientinfo.getDose() == 2);
                     req.using("Patient should now be vaccinating.", patientinfo.isApprovedForVaccination());
                     req.using("Patient's vaccination process is not complete.'", !patientinfo.isVaccinationProcessComplete());
 
+
                     req.using("Patient must receive a Pfizer or Moderna vaccine.", patientinfo.getFirstDoseManufacturer().equalsIgnoreCase("pfizer") || patientinfo.getFirstDoseManufacturer().equalsIgnoreCase("moderna"));
+                    req.using("Patient must receive a Pfizer or Moderna vaccine.", patientinfo.getSecondDoseManufacturer().equalsIgnoreCase("pfizer") || patientinfo.getSecondDoseManufacturer().equalsIgnoreCase("moderna"));
+
                     return null;
                 });
 

@@ -176,8 +176,4 @@ public class ApprovePatientInitiator extends FlowLogic<SignedTransaction> {
         // Step 7. Assuming no exceptions, we can now finalise the transaction
         return subFlow(new FinalityFlow(stx, sessions));
     }
-
-
-
-
 }

@@ -130,7 +130,7 @@ public class PatientInfoState implements ContractState {
     }
 
     public Party getClinicAdmin() {
-        return patientEmployer;
+        return clinicAdmin;
     }
 
     /* This method will indicate who are the participants and required signers when

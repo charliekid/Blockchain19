@@ -75,7 +75,7 @@ public class Controller {
                 secDate,secLot,mfrName,false,patientNode, doctorNodes,employerNode,clinicAdmin1);
 
 
-        return "Sent";
+        return "Patient: " + firstName + "is approved for first vaccine";
     }
 
     @PostMapping("registerVaccine")

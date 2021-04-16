@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Suspendable;
 import com.template.contracts.PatientContract;
 import com.template.states.PatientInfoState;
 import net.corda.core.contracts.Command;
+import net.corda.core.contracts.StateAndRef;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
@@ -93,6 +94,22 @@ public class PatientSendInfoInitiator extends FlowLogic<SignedTransaction> {
     @Suspendable
     @Override
     public SignedTransaction call() throws FlowException {
+
+        if(!getOurIdentity().equals(patientFullName)) {
+            throw new IllegalStateException("This transaction needs to be initiated by a patient.");
+        }
+//
+//        // get vault
+//        List<StateAndRef<PatientInfoState>> patientInfoStateAndRefs = getServiceHub().getVaultService().queryBy(PatientInfoState.class).getStates();
+//
+//        // find incoming patient from vault
+//        StateAndRef<PatientInfoState> inputPatientInfoStateAndRef = patientInfoStateAndRefs
+//                .stream().filter(patientInfoStateAndRef -> {
+//                    PatientInfoState patientInfoState = patientInfoStateAndRef.getState().getData();
+//                    return !patientInfoState.getFirstName().equals(firstName) && patientInfoState.getLastName().equals(lastName);
+//                }).findAny().orElseThrow(() -> new IllegalArgumentException("The patient already exists."));
+//
+
 
         // Step 1. Get a reference to the notary service on our network and our key pair.
         // Note: ongoing work to support multiple notary identities is still in progress.

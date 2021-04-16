@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @InitiatingFlow
 @StartableByRPC
 
-public class AdministerSecondDoseInitiator extends FlowLogic<SignedTransaction>  {
+public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction> {
 
 
     // We will not use these ProgressTracker for this Hello-World sample
@@ -53,21 +53,22 @@ public class AdministerSecondDoseInitiator extends FlowLogic<SignedTransaction> 
     private final Party patientEmployer;
     private final Party clinicAdmin;
 
-    public AdministerSecondDoseInitiator(String firstName,
-                                         String lastName,
-                                         int dose,
-                                         boolean approvedForVaccination,
-                                         Date firstDoseDate,
-                                         String firstDoseLot,
-                                         String firstDoseManufacturer,
-                                         Date secondDoseDate,
-                                         String secondDoseLot,
-                                         String secondDoseManufacturer,
-                                         boolean vaccinationProcessComplete,
-                                         Party patientFullName,
-                                         Party doctor,
-                                         Party patientEmployer,
-                                         Party clinicAdmin) {
+
+    public ApprovePatientForWorkInitiator(String firstName,
+                                          String lastName,
+                                          int dose,
+                                          boolean approvedForVaccination,
+                                          Date firstDoseDate,
+                                          String firstDoseLot,
+                                          String firstDoseManufacturer,
+                                          Date secondDoseDate,
+                                          String secondDoseLot,
+                                          String secondDoseManufacturer,
+                                          boolean vaccinationProcessComplete,
+                                          Party patientFullName,
+                                          Party doctor,
+                                          Party patientEmployer,
+                                          Party clinicAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dose = dose;
@@ -90,14 +91,16 @@ public class AdministerSecondDoseInitiator extends FlowLogic<SignedTransaction> 
         this.clinicAdmin = clinicAdmin;
     }
 
+
+
     @Suspendable
     @Override
     public SignedTransaction call() throws FlowException {
-        // TODO: facilitate inputs from ApprovePatient flow.
+        // TODO: facilitate inputs from PatientSendInfo flow.
 
-//        if (!getOurIdentity().equals(clinicAdmin)) {
-//            throw new IllegalStateException("This transaction needs to be initiated by a clinic administrator.");
-//        }
+        if (!getOurIdentity().equals(doctor)) {
+            throw new IllegalStateException("This transaction needs to be initiated by a doctor.");
+        }
 
         // Step 1. Get a reference to the notary service on our network and our key pair.
         // Note: ongoing work to support multiple notary identities is still in progress.
@@ -111,19 +114,19 @@ public class AdministerSecondDoseInitiator extends FlowLogic<SignedTransaction> 
         StateAndRef<PatientInfoState> inputPatientInfoStateAndRef = patientInfoStateAndRefs
                 .stream().filter(patientInfoStateAndRef -> {
                     PatientInfoState patientInfoState = patientInfoStateAndRef.getState().getData();
-                    return patientInfoState.getFirstName().equals(firstName) && patientInfoState.getLastName().equals(lastName) && patientInfoState.isApprovedForVaccination();
+                    return patientInfoState.getFirstName().equals(firstName) && patientInfoState.getLastName().equals(lastName);
                 }).findAny().orElseThrow(() -> new IllegalArgumentException("The patient was not found."));
 
         PatientInfoState inputPatientInfoState = inputPatientInfoStateAndRef.getState().getData();
 
         // check if the patient's doctor has started this transaction
-//        if (!(getOurIdentity().equals(inputPatientInfoState.getClinicAdmin()))) {
-//            throw new IllegalStateException("The patient's clinic administrator must start this transaction.");
-//        }
+        if (!(getOurIdentity().equals(inputPatientInfoState.getDoctor()))) {
+            throw new IllegalStateException("The patient's doctor must start this transaction.");
+        }
 
         // check for any prior dosages
-        if (inputPatientInfoState.getDose() == 2) {
-            throw new IllegalArgumentException("The patient has already received their second dose.");
+        if (inputPatientInfoState.getDose() < 2) {
+            throw new IllegalArgumentException("The patient is not done with their vaccination.");
         }
 
         //Compose the State that carries the Hello World message
@@ -150,7 +153,7 @@ public class AdministerSecondDoseInitiator extends FlowLogic<SignedTransaction> 
         // Step 4. Add the iou as an output state, as well as a command to the transaction builder.
         builder.addInputState(inputPatientInfoStateAndRef);
         builder.addOutputState(output);
-        builder.addCommand(new PatientContract.Commands.AdministerSecondDose(),
+        builder.addCommand(new PatientContract.Commands.ApprovePatient(),
                 Arrays.asList(this.patientFullName.getOwningKey(), this.doctor.getOwningKey(), this.patientEmployer.getOwningKey(), this.clinicAdmin.getOwningKey()));
 
         // Step 5. Verify and sign it with our KeyPair.
@@ -168,5 +171,4 @@ public class AdministerSecondDoseInitiator extends FlowLogic<SignedTransaction> 
         // Step 7. Assuming no exceptions, we can now finalise the transaction
         return subFlow(new FinalityFlow(stx, sessions));
     }
-
 }

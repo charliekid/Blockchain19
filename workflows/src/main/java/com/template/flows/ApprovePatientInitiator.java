@@ -103,12 +103,17 @@ public class ApprovePatientInitiator extends FlowLogic<SignedTransaction> {
     public SignedTransaction call() throws FlowException {
         // TODO: facilitate inputs from PatientSendInfo flow.
 
+        if (!getOurIdentity().equals(doctor)) {
+            throw new IllegalStateException("This transaction needs to be initiated by a doctor.");
+        }
 
         // Step 1. Get a reference to the notary service on our network and our key pair.
         // Note: ongoing work to support multiple notary identities is still in progress.
         final Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
+
         // get vault
         List<StateAndRef<PatientInfoState>> patientInfoStateAndRefs = getServiceHub().getVaultService().queryBy(PatientInfoState.class).getStates();
+        System.out.println(patientInfoStateAndRefs.size());
 
         // find incoming patient from vault
         StateAndRef<PatientInfoState> inputPatientInfoStateAndRef = patientInfoStateAndRefs
@@ -117,15 +122,17 @@ public class ApprovePatientInitiator extends FlowLogic<SignedTransaction> {
                     return patientInfoState.getFirstName().equals(firstName) && patientInfoState.getLastName().equals(lastName);
                 }).findAny().orElseThrow(() -> new IllegalArgumentException("The patient was not found."));
 
-//        PatientInfoState inputPatientInfoState = inputPatientInfoStateAndRef.getState().getData();
+        PatientInfoState inputPatientInfoState = inputPatientInfoStateAndRef.getState().getData();
 
+        // check if the patient's doctor has started this transaction
+        if (!(getOurIdentity().equals(inputPatientInfoState.getDoctor()))) {
+            throw new IllegalStateException("The patient's doctor must start this transaction.");
+        }
 
-
-        // check if the patient started this transaction.
-//
-//        if(!(getOurIdentity().equals(input))) {
-//
-//        }
+        // check for any prior dosages
+        if (inputPatientInfoState.getDose() > 0) {
+            throw new IllegalArgumentException("The patient has already started their vaccination process.");
+        }
 
         //Compose the State that carries the Hello World message
         final PatientInfoState output =
@@ -169,8 +176,4 @@ public class ApprovePatientInitiator extends FlowLogic<SignedTransaction> {
         // Step 7. Assuming no exceptions, we can now finalise the transaction
         return subFlow(new FinalityFlow(stx, sessions));
     }
-
-
-
-
 }

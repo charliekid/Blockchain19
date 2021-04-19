@@ -1,5 +1,6 @@
 package com.template.webserver;
 
+import com.template.flows.ApprovePatientInitiator;
 import com.template.flows.PatientSendInfoInitiator;
 import com.template.states.PatientInfoState;
 import net.corda.client.rpc.CordaRPCClient;
@@ -13,8 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import net.corda.core.identity.Party;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 
 /**
@@ -61,6 +65,25 @@ public class Controller {
         String date = firstDoseDate.toString();
         return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
     }*/
+    @PostMapping("clinicAdminApproval")
+    public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName, @RequestHeader String firstDate, @RequestHeader String lotOne, @RequestHeader String secDate, @RequestHeader String secLot, @RequestHeader String username ) throws ParseException {
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
+        // We need to get all the parties identies.
+        Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
+        Party doctorNodes = connectNodeViaRPC("Doctor1").nodeInfo().getLegalIdentities().get(0);
+        Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
+        Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
+
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+        Date firDate = df.parse(firstDate);
+        Date secondDate = df.parse(secDate);
+
+        activeParty.startFlowDynamic(ApprovePatientInitiator.class, firstName, lastName,1,false,firDate, lotOne,mfrName,
+                secondDate,secLot,mfrName,false,patientNode, doctorNodes,employerNode,clinicAdmin1);
+
+
+        return "Patient: " + firstName + "is approved for first vaccine";
+    }
 
     @PostMapping("registerVaccine")
     public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose, @RequestHeader String username){
@@ -127,20 +150,25 @@ public class Controller {
         int port = getPortAddress(partyName);
         String host = "localhost";
         String username = "";
-        if(partyName.equals("ClinicAdmin1")) {
-            username = "ClinicAdmin1";
-        } else {
-            username = "user1";
-        }
-        String password = "test";
-        NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
 
-        // Sets up the connection to our node with the specified
-        // we prolly might want to do a try catch here for when some enters in the wrong user name maybe
-        CordaRPCClient client = new CordaRPCClient(nodeAddress);
-        CordaRPCConnection connection = client.start(username, password);
-        CordaRPCOps cordaRPCOperations = connection.getProxy();
-        return cordaRPCOperations;
+            if (partyName.equals("ClinicAdmin1")) {
+                username = "ClinicAdmin1";
+            } else {
+                username = "user1";
+            }
+            String password = "test";
+            NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
+
+            // Sets up the connection to our node with the specified
+            // we prolly might want to do a try catch here for when some enters in the wrong user name maybe
+            CordaRPCClient client = new CordaRPCClient(nodeAddress);
+            CordaRPCConnection connection = client.start(username, password);
+            CordaRPCOps cordaRPCOperations = connection.getProxy();
+            return cordaRPCOperations;
+
+            //System.out.println();
+            //return ;
+
 
     }
 

@@ -98,8 +98,8 @@ public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction>
     public SignedTransaction call() throws FlowException {
         // TODO: facilitate inputs from PatientSendInfo flow.
 
-        if (!getOurIdentity().equals(doctor)) {
-            throw new IllegalStateException("This transaction needs to be initiated by a doctor.");
+        if (!getOurIdentity().equals(patientEmployer)) {
+            throw new IllegalStateException("This transaction needs to be initiated by a employer.");
         }
 
         // Step 1. Get a reference to the notary service on our network and our key pair.
@@ -120,8 +120,8 @@ public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction>
         PatientInfoState inputPatientInfoState = inputPatientInfoStateAndRef.getState().getData();
 
         // check if the patient's doctor has started this transaction
-        if (!(getOurIdentity().equals(inputPatientInfoState.getDoctor()))) {
-            throw new IllegalStateException("The patient's doctor must start this transaction.");
+        if (!(getOurIdentity().equals(inputPatientInfoState.getPatientEmployer()))) {
+            throw new IllegalStateException("The patient's employer must start this transaction.");
         }
 
         // check for any prior dosages
@@ -153,7 +153,7 @@ public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction>
         // Step 4. Add the iou as an output state, as well as a command to the transaction builder.
         builder.addInputState(inputPatientInfoStateAndRef);
         builder.addOutputState(output);
-        builder.addCommand(new PatientContract.Commands.ApprovePatient(),
+        builder.addCommand(new PatientContract.Commands.ApprovePatientForWork(),
                 Arrays.asList(this.patientFullName.getOwningKey(), this.doctor.getOwningKey(), this.patientEmployer.getOwningKey(), this.clinicAdmin.getOwningKey()));
 
         // Step 5. Verify and sign it with our KeyPair.

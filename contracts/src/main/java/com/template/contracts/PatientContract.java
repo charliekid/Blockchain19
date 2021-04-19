@@ -117,8 +117,6 @@ public class PatientContract implements Contract {
                 require.using("Patient's vaccination process is not complete.", !output.isVaccinationProcessComplete());
                 require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
 
-
-
                 //todo: check for lot numbers and dates
 
                 require.using("Lot number required.", !(output.getFirstDoseLot().isEmpty() || output.getFirstDoseLot().equalsIgnoreCase("none")));
@@ -160,7 +158,6 @@ public class PatientContract implements Contract {
                 require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
 
 
-
                 //todo: check for lot numbers and dates
 
                 require.using("Lot number required.", !(output.getFirstDoseLot().isEmpty() || output.getFirstDoseLot().equalsIgnoreCase("none")));
@@ -175,9 +172,54 @@ public class PatientContract implements Contract {
 
                 return null;
             });
-        }
+        } else if (command.getValue() instanceof Commands.ApprovePatientForWork) {
 
-        else {
+            //todo: change some shit here
+            //Retrieve the output state of the transaction
+            PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
+
+            //Retrieve the input state of the transaction
+            PatientInfoState input = tx.inputsOfType(PatientInfoState.class).get(0);
+
+            //Using Corda DSL function requireThat to replicate conditions-checks
+            requireThat(require -> {
+                SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+                Date placeholder = new Date();
+
+                try {
+                    placeholder = parser.parse("0000-00-00");
+
+                } catch (java.text.ParseException e) {
+                    e.printStackTrace();
+                }
+
+                require.using("Information for a singular patient must be consumed as input.", tx.getInputStates().size() == 1);
+
+                //check input
+                require.using("Incoming patient must have two doses.", input.getDose() == 2);
+                require.using("Incoming patient's vaccination process is not complete.", !input.isVaccinationProcessComplete());
+                require.using("Patient should now be ready for vaccination.", input.isApprovedForVaccination());
+
+                //check output
+                require.using("Patient must have a second dose.", output.getDose() == 2);
+                require.using("Patient's vaccination process should now be complete.", output.isVaccinationProcessComplete());
+                require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
+
+
+                //todo: check for lot numbers and dates
+
+                require.using("Lot number required.", !(output.getFirstDoseLot().isEmpty() || output.getFirstDoseLot().equalsIgnoreCase("none")));
+                require.using("Manufacturer required.", !(output.getFirstDoseManufacturer().isEmpty() || output.getFirstDoseManufacturer().equalsIgnoreCase("none")));
+                require.using("Lot number required.", !(output.getSecondDoseLot().isEmpty() || output.getSecondDoseLot().equalsIgnoreCase("none")));
+                require.using("Manufacturer required.", !(output.getSecondDoseManufacturer().isEmpty() || output.getSecondDoseManufacturer().equalsIgnoreCase("none")));
+
+                /* check date here*/
+//                require.using("Date required.", !(output.getFirstDoseDate().equals(placeholder)));
+//                require.using("Date required.", !(output.getSecondDoseDate().equals(placeholder)));
+
+                return null;
+            });
+        } else {
             throw new IllegalArgumentException("Unrecognized command.");
         }
 

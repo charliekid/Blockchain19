@@ -150,20 +150,25 @@ public class Controller {
         int port = getPortAddress(partyName);
         String host = "localhost";
         String username = "";
-        if(partyName.equals("ClinicAdmin1")) {
-            username = "ClinicAdmin1";
-        } else {
-            username = "user1";
-        }
-        String password = "test";
-        NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
 
-        // Sets up the connection to our node with the specified
-        // we prolly might want to do a try catch here for when some enters in the wrong user name maybe
-        CordaRPCClient client = new CordaRPCClient(nodeAddress);
-        CordaRPCConnection connection = client.start(username, password);
-        CordaRPCOps cordaRPCOperations = connection.getProxy();
-        return cordaRPCOperations;
+            if (partyName.equals("ClinicAdmin1")) {
+                username = "ClinicAdmin1";
+            } else {
+                username = "user1";
+            }
+            String password = "test";
+            NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
+
+            // Sets up the connection to our node with the specified
+            // we prolly might want to do a try catch here for when some enters in the wrong user name maybe
+            CordaRPCClient client = new CordaRPCClient(nodeAddress);
+            CordaRPCConnection connection = client.start(username, password);
+            CordaRPCOps cordaRPCOperations = connection.getProxy();
+            return cordaRPCOperations;
+
+            //System.out.println();
+            //return ;
+
 
     }
 

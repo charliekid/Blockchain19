@@ -35,36 +35,12 @@ We will work with Jonathan and Matt from the DMDC to make a program that will tr
 ## User Stories
 https://bit.ly/3dP3OBZ
 
-## Iteration 1 ()
 
-**User Story**:
-
-**How will it be tested**:
-- [ ] place holder
-- [ ] place holder
-
-Notes:
-- place holder
-
-***
-
-## Iteration 2 ()
-
-**User Story**:
-
-**How will it be tested**:
-- [ ] place holder
-- [ ] place holder
-
-Notes:
-- place holder
-
-***
 
 ## Mockups
-![mockup1](/img/mockup-1.png)
-![mockup2](/img/mockup-2.png)
-![mockup3](/img/mockup-3.png)
+![mockup1](img/mockup-1.png)
+![mockup2](img/mockup-2.png)
+![mockup3](img/mockup-3.png)
 
 ## UMLs and ERDs
 ![uml](img/uml1.png)
@@ -74,13 +50,10 @@ Notes:
   <img src="https://www.corda.net/wp-content/uploads/2016/11/fg005_corda_b.png" alt="Corda" width="500">
 </p>
 
-# CorDapp Template - Java [<img src="https://raw.githubusercontent.com/corda/samples-java/master/webIDE.png" height=25 />](https://ide.corda.net/?folder=/home/coder/cordapp-template-java)
+# CorDapp - Java [<img src="https://raw.githubusercontent.com/corda/samples-java/master/webIDE.png" height=25 />](https://ide.corda.net/?folder=/home/coder/cordapp-template-java)
 
-Welcome to the Java CorDapp template. The CorDapp template is a stubbed-out CorDapp that you can use to bootstrap
-your own CorDapps.
 
-**This is the Java version of the CorDapp template. The Kotlin equivalent is
-[here](https://github.com/corda/cordapp-template-kotlin/).**
+This application is a CorDapp. We used a template from Corda that was stubbed-out so that we can create our own project over it.
 
 # Pre-Requisites
 

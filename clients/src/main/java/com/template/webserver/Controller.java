@@ -1,5 +1,7 @@
 package com.template.webserver;
 
+import com.template.contracts.PatientContract;
+import com.template.flows.AdministerFirstDoseInitiator;
 import com.template.flows.ApprovePatientInitiator;
 import com.template.flows.PatientSendInfoInitiator;
 import com.template.states.PatientInfoState;
@@ -78,7 +80,7 @@ public class Controller {
         Date firDate = df.parse(firstDate);
         Date secondDate = df.parse(secDate);
 
-        activeParty.startFlowDynamic(ApprovePatientInitiator.class, firstName, lastName,1,false,firDate, lotOne,mfrName,
+        activeParty.startFlowDynamic(AdministerFirstDoseInitiator.class, firstName, lastName,1,true,firDate, lotOne,mfrName,
                 secondDate,secLot,mfrName,false,patientNode, doctorNodes,employerNode,clinicAdmin1);
 
 
@@ -103,6 +105,24 @@ public class Controller {
                 new Date(0000-00-00), "none", "none",
                 false, patientNode, doctorNodes, employerNode, clinicAdmin1);
         return "Hi," + firstName + " " + lastName + " currently recieved " + dose;
+
+    }
+
+    @PostMapping("approvePatient")
+    public String approvePatient(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String username){
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
+        // We need to get all the parties identies.
+        Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
+        Party doctorNodes = connectNodeViaRPC("Doctor1").nodeInfo().getLegalIdentities().get(0);
+        Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
+        Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
+
+        activeParty.startFlowDynamic(ApprovePatientInitiator.class, firstName, lastName, 0, true,
+                new Date(0000-00-00), "none", "none",
+                new Date(0000-00-00), "none", "none",
+                false, patientNode, doctorNodes, employerNode, clinicAdmin1);
+
+        return "patient is now approved!";
 
     }
 

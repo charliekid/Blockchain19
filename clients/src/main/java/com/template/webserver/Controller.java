@@ -76,7 +76,7 @@ public class Controller {
         Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
         Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
 
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Date firDate = df.parse(firstDate);
         Date secondDate = df.parse(secDate);
 

@@ -76,9 +76,10 @@ public class Controller {
         Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
         Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
 
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+        DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
         Date firDate = df.parse(firstDate);
         Date secondDate = df.parse(secDate);
+        //DateFormat newDate1()
 
         activeParty.startFlowDynamic(AdministerFirstDoseInitiator.class, firstName, lastName,1,true,firDate, lotOne,mfrName,
                 secondDate,secLot,mfrName,false,patientNode, doctorNodes,employerNode,clinicAdmin1);

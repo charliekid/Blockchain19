@@ -171,13 +171,14 @@ public class Controller {
         int port = getPortAddress(partyName);
         String host = "localhost";
         String username = "";
-
+        String password = "test";
+        try {
             if (partyName.equals("ClinicAdmin1")) {
                 username = "ClinicAdmin1";
             } else {
                 username = "user1";
             }
-            String password = "test";
+
             NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
 
             // Sets up the connection to our node with the specified
@@ -186,6 +187,23 @@ public class Controller {
             CordaRPCConnection connection = client.start(username, password);
             CordaRPCOps cordaRPCOperations = connection.getProxy();
             return cordaRPCOperations;
+        }
+        catch(Exception error){
+            if(partyName != "ClinicAdmin1" && partyName != "user1"){
+                System.out.println("Invalid username");
+            }
+            //CordaRPCOps operation = ;
+            /*NetworkHostAndPort nodeAddress = new NetworkHostAndPort(host, port);
+
+            CordaRPCClient client = new CordaRPCClient(nodeAddress);
+            CordaRPCConnection connection = client.start(username, password);
+
+            CordaRPCOps operation = connection.getProxy();
+            */
+
+            //connection.
+            return null;
+        }
 
             //System.out.println();
             //return ;

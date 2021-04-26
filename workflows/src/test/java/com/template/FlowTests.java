@@ -29,13 +29,6 @@ import static org.junit.Assert.*;
 public class FlowTests {
     private MockNetwork network;
     private StartedMockNode a, b, c, d;
-
-    // im not sure if we use those or not, but we will leave those here just in case.
-    private final TestIdentity charlie = new TestIdentity(new CordaX500Name("Charlie", "", "GB"));
-    private final TestIdentity jorge = new TestIdentity(new CordaX500Name("Jorge", "", "GB"));
-    private final TestIdentity marc = new TestIdentity(new CordaX500Name("Marc", "", "GB"));
-    private final TestIdentity jonathan = new TestIdentity(new CordaX500Name("Jonathan", "", "GB"));
-
     @Before
     public void setup() {
         network = new MockNetwork(new MockNetworkParameters().withCordappsForAllNodes(ImmutableList.of(
@@ -56,7 +49,8 @@ public class FlowTests {
             node.registerInitiatedFlow(PatientSendInfoResponder.class);
             node.registerInitiatedFlow(ApprovePatientResponder.class);
             node.registerInitiatedFlow(AdministerFirstDoseResponder.class);
-            // other responders here
+            node.registerInitiatedFlow(AdministerSecondDoseResponder.class);
+            node.registerInitiatedFlow(ApprovePatientForWorkResponder.class);
         }
         network.runNetwork();
     }
@@ -66,10 +60,6 @@ public class FlowTests {
         network.stopNodes();
     }
 
-    @Test
-    public void dummyTest() {
-
-    }
     // tests appropriated from from https://github.com/corda/bootcamp-cordapp/blob/v4/src/test/java/bootcamp/FlowTests.java and https://docs.corda.net/docs/corda-os/4.7/flow-testing.html
 
     @Test
@@ -1942,7 +1932,7 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
-        CordaFuture<SignedTransaction> future5 = c.startFlow(approvePatientForWorkFlow);
+        CordaFuture<SignedTransaction> future5 = d.startFlow(approvePatientForWorkFlow);
         network.runNetwork();
         SignedTransaction signedTransaction5 = future5.get();
         PatientInfoState outputPatientInfo5 = (PatientInfoState) signedTransaction5.getTx().getOutputs().get(0).getData();
@@ -1956,8 +1946,6 @@ public class FlowTests {
         assertNotEquals(outputPatientInfo5.getFirstDoseDate(), placeholder);
         assertTrue(outputPatientInfo5.isVaccinationProcessComplete());
     }
-
-
 
 
     //todo: implement tests for shit approvepatientforworkinitiator flow inputs here
@@ -2113,28 +2101,11 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
-        CordaFuture<SignedTransaction> future5 = c.startFlow(approvePatientForWorkFlow);
+        CordaFuture<SignedTransaction> future5 = d.startFlow(approvePatientForWorkFlow);
         network.runNetwork();
         SignedTransaction signedTransaction5 = future5.get();
         PatientInfoState outputPatientInfo5 = (PatientInfoState) signedTransaction5.getTx().getOutputs().get(0).getData();
     }
-
-
-
-
-
-
-
-
-
-
-//    @Test
-//    public void singleDose() {
-//        // johnson && johnson
-//
-//    }
-
-
 
 
 

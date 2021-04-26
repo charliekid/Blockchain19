@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 // ******************
 @InitiatingFlow
 @StartableByRPC
-
+//@InitiatedBy()
 public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction> {
 
 
@@ -96,10 +96,8 @@ public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction>
     @Suspendable
     @Override
     public SignedTransaction call() throws FlowException {
-        // TODO: facilitate inputs from PatientSendInfo flow.
-
-        if (!getOurIdentity().equals(patientEmployer)) {
-            throw new IllegalStateException("This transaction needs to be initiated by a employer.");
+        if (!getOurIdentity().equals(clinicAdmin)) {
+            throw new IllegalStateException("This transaction needs to be initiated by a clinic admin.");
         }
 
         // Step 1. Get a reference to the notary service on our network and our key pair.
@@ -120,8 +118,8 @@ public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction>
         PatientInfoState inputPatientInfoState = inputPatientInfoStateAndRef.getState().getData();
 
         // check if the patient's doctor has started this transaction
-        if (!(getOurIdentity().equals(inputPatientInfoState.getPatientEmployer()))) {
-            throw new IllegalStateException("The patient's employer must start this transaction.");
+        if (!(getOurIdentity().equals(inputPatientInfoState.getClinicAdmin()))) {
+            throw new IllegalStateException("The patient's clinic admin must start this transaction.");
         }
 
         // check for any prior dosages

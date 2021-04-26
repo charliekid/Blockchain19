@@ -154,7 +154,7 @@ public class PatientContract implements Contract {
 
                 //check output
                 require.using("Patient must have a second dose.", output.getDose() == 2);
-                require.using("Patient's vaccination process is not complete.", !output.isVaccinationProcessComplete());
+//                require.using("Patient's vaccination process is not complete.", !output.isVaccinationProcessComplete());
                 require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
 
 

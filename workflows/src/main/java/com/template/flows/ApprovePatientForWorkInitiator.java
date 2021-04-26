@@ -96,12 +96,14 @@ public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction>
     @Suspendable
     @Override
     public SignedTransaction call() throws FlowException {
+
+        // check if clinic admin started the transaction
         if (!getOurIdentity().equals(clinicAdmin)) {
-            throw new IllegalStateException("This transaction needs to be initiated by a clinic admin.");
+            System.out.println("This transaction needs to be initiated by a clinic administrator.");
+            throw new IllegalStateException("This transaction needs to be initiated by a clinic administrator.");
         }
 
-        // Step 1. Get a reference to the notary service on our network and our key pair.
-        // Note: ongoing work to support multiple notary identities is still in progress.
+        // get a reference to the notary service on our network and our key pair.
         final Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
         // get vault
@@ -117,13 +119,15 @@ public class ApprovePatientForWorkInitiator extends FlowLogic<SignedTransaction>
 
         PatientInfoState inputPatientInfoState = inputPatientInfoStateAndRef.getState().getData();
 
-        // check if the patient's doctor has started this transaction
+        // check if the patient's clinic admin has started this transaction
         if (!(getOurIdentity().equals(inputPatientInfoState.getClinicAdmin()))) {
+            System.out.println("The patient's clinic admin must start this transaction.");
             throw new IllegalStateException("The patient's clinic admin must start this transaction.");
         }
 
-        // check for any prior dosages
+        // check for having 2 doses
         if (inputPatientInfoState.getDose() < 2) {
+            System.out.println("The patient is not done with their vaccination.");
             throw new IllegalArgumentException("The patient is not done with their vaccination.");
         }
 

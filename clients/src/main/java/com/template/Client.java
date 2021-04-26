@@ -1,7 +1,9 @@
 package com.template;
 
+import com.template.states.PatientInfoState;
 import net.corda.client.rpc.CordaRPCClient;
 import net.corda.client.rpc.CordaRPCConnection;
+import net.corda.core.contracts.StateAndRef;
 import net.corda.core.identity.CordaX500Name;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.node.NodeInfo;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static net.corda.core.utilities.NetworkHostAndPort.parse;
+import com.template.webserver.Controller;
 
 /**
  * Connects to a Corda node via RPC and performs RPC operations on the node.
@@ -41,6 +44,11 @@ public class Client {
         CordaX500Name name = proxy.nodeInfo().getLegalIdentities().get(0).getName();//nodeInfo().legalIdentities.first().name
         System.out.println("\n-- Here is the node info of the node that the client connected to --");
         logger.info("{}", name);
+
+        CordaRPCOps activeParty = Controller.connectNodeViaRPC("Patient1");
+        List<StateAndRef<PatientInfoState>> assetList = activeParty.vaultQuery(PatientInfoState.class).getStates();
+        System.out.println("[Asset List]" + assetList);
+        System.out.println(assetList.get(0).component1());
 
         //Close the client connection
         clientConnection.close();

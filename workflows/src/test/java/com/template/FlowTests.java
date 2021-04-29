@@ -1093,7 +1093,7 @@ public class FlowTests {
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertTrue(outputPatientInfo.isApprovedForVaccination());
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
         // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",

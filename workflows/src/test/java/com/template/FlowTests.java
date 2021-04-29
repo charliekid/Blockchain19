@@ -60,7 +60,8 @@ public class FlowTests {
         network.stopNodes();
     }
 
-    // tests appropriated from from https://github.com/corda/bootcamp-cordapp/blob/v4/src/test/java/bootcamp/FlowTests.java and https://docs.corda.net/docs/corda-os/4.7/flow-testing.html
+    // tests appropriated from from https://github.com/corda/bootcamp-cordapp/blob/v4/src/test/java/bootcamp/FlowTests.java
+    // and https://docs.corda.net/docs/corda-os/4.7/flow-testing.html
 
     @Test
     public void transactionConstructedByFlowUsesTheCorrectNotary() throws Exception {
@@ -175,7 +176,7 @@ public class FlowTests {
         assertEquals(1, signedTransaction.getTx().getOutputStates().size());
         TransactionState output = signedTransaction.getTx().getOutputs().get(0);
 
-        assertEquals("com.template.contracts.PatientContract", output.getContract()); // todo: this
+        assertEquals("com.template.contracts.PatientContract", output.getContract());
     }
 
     @Test
@@ -313,6 +314,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator flow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -329,15 +331,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
-
+        // patient node starts the flow
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
 
-//        signedTransaction.getTx().getOutputs().get(0).getData()
-        // assert equals some stuff here.
+        // assertions for output
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo.getDose(), 0);
+        assertEquals(0, outputPatientInfo.getDose());
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
     }
 
     @Test(expected = ExecutionException.class)
@@ -357,6 +359,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator flow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -373,6 +376,7 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node tries to initiate the flow
         CordaFuture<SignedTransaction> future = b.startFlow(flow);
         network.runNetwork(); // expects a failure
         SignedTransaction signedTransaction = future.get();
@@ -394,8 +398,9 @@ public class FlowTests {
         Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
-        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("marc",
 
+        // construct the flow's output -- one dose.
+        PatientSendInfoInitiator flow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 1,
                 false,
@@ -411,6 +416,7 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node initiates flow
         CordaFuture<SignedTransaction> future = a.startFlow(flow);
         network.runNetwork(); // expects a failure
         SignedTransaction signedTransaction = future.get();
@@ -428,6 +434,12 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -439,25 +451,21 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
-        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
-        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
-        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
-        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
-
+        // patient node initiates the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
 
-//        signedTransaction.getTx().getOutputs().get(0).getData()
-        // assert equals some stuff here.
+        // assert equals for output state
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the second flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -469,18 +477,19 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
+        // doctor node initiates the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
-
+        // assert equals for output state
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
     }
 
     @Test(expected = ExecutionException.class)
@@ -495,6 +504,12 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -506,21 +521,21 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
-
+        // patient node initiates flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
 
-//        signedTransaction.getTx().getOutputs().get(0).getData()
-        // assert equals some stuff here.
+        // assert equals for output state
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output -- nonexistent patient
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("charlie",
                 "nguyen",
                 0,
@@ -532,13 +547,14 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
+        // doctor node initiates flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
-        network.runNetwork();
+        network.runNetwork(); // expects a failure
         SignedTransaction signedTransaction2 = future2.get();
     }
 
@@ -554,6 +570,12 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        Party patient = a.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party doctor = b.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+        Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
+
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -565,18 +587,21 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
+        // patient node initiates the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
 
+        // assert for output state
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -588,13 +613,14 @@ public class FlowTests {
                 "none",
                 "none",
                 false,
-                a.getInfo().getLegalIdentities().get(0),
-                b.getInfo().getLegalIdentities().get(0),
-                c.getInfo().getLegalIdentities().get(0),
-                d.getInfo().getLegalIdentities().get(0));
+                patient,
+                doctor,
+                employer,
+                clinicAdmin);
 
+        // patient node tries to initiate the flow
         CordaFuture<SignedTransaction> future2 = a.startFlow(approvePatientFlow);
-        network.runNetwork();
+        network.runNetwork(); // expects a failure
         SignedTransaction signedTransaction2 = future2.get();
     }
 
@@ -616,6 +642,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -632,12 +659,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node initiates flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        // assertion for output state
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
+
 
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
@@ -655,13 +685,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node initiates flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -672,6 +703,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -688,19 +720,19 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin node initiates flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction3 = future3.get();
         PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
-        // assert some stuffs
-        assertEquals(outputPatientInfo3.getDose(), 1);
-        assertEquals(outputPatientInfo3.getFirstDoseLot(), "123a45b");
-        assertEquals(outputPatientInfo3.getFirstDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo3.getFirstDoseDate(), placeholder);
+        // assertions for output
+        assertEquals(1, outputPatientInfo3.getDose());
+        assertEquals("123a45b", outputPatientInfo3.getFirstDoseLot());
+        assertEquals("moderna", outputPatientInfo3.getFirstDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo3.getFirstDoseDate());
     }
 
-    //todo: implement tests for shit administerfirstdoseinitiator flow inputs here
 
     @Test(expected = ExecutionException.class)
     public void AdministerFirstDoseButItIsNotModernaOrPfizer() throws Exception {
@@ -719,6 +751,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -735,13 +768,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -758,13 +793,13 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
-
-
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -775,6 +810,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -791,8 +827,9 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
-        network.runNetwork();
+        network.runNetwork(); // expects a failure
         SignedTransaction signedTransaction3 = future3.get();
     }
 
@@ -813,6 +850,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -834,8 +872,9 @@ public class FlowTests {
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -858,7 +897,7 @@ public class FlowTests {
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -869,6 +908,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -885,10 +925,12 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction3 = future3.get();
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow2 = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -905,9 +947,9 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
-
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future4 = d.startFlow(administerFirstDoseFlow2);
-        network.runNetwork();
+        network.runNetwork(); // expects a failure
         SignedTransaction signedTransaction4 = future4.get();
     }
 
@@ -928,6 +970,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -944,13 +987,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -967,13 +1012,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -984,6 +1030,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -1000,8 +1047,9 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node attempts to start flow
         CordaFuture<SignedTransaction> future3 = a.startFlow(administerFirstDoseFlow);
-        network.runNetwork();
+        network.runNetwork(); // expects failure
         SignedTransaction signedTransaction3 = future3.get();
     }
 
@@ -1022,6 +1070,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -1038,13 +1087,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertTrue(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -1061,13 +1112,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -1078,6 +1130,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output -- nonexistent patient
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("charlie",
                 "nguyen",
                 1,
@@ -1094,8 +1147,9 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
-        network.runNetwork();
+        network.runNetwork(); // expects failure
         SignedTransaction signedTransaction3 = future3.get();
     }
 
@@ -1117,6 +1171,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -1133,13 +1188,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -1156,13 +1213,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -1194,11 +1252,11 @@ public class FlowTests {
         SignedTransaction signedTransaction3 = future3.get();
         PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
-        // assert some stuffs
-        assertEquals(outputPatientInfo3.getDose(), 1);
-        assertEquals(outputPatientInfo3.getFirstDoseLot(), "123a45b");
-        assertEquals(outputPatientInfo3.getFirstDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo3.getFirstDoseDate(), placeholder);
+        // assertions for output
+        assertEquals(1, outputPatientInfo3.getDose());
+        assertEquals("123a45b", outputPatientInfo3.getFirstDoseLot());
+        assertEquals("moderna", outputPatientInfo3.getFirstDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo3.getFirstDoseDate());
 
         Date secondDoseDate = new Date();
 
@@ -1229,15 +1287,12 @@ public class FlowTests {
         SignedTransaction signedTransaction4 = future4.get();
         PatientInfoState outputPatientInfo4 = (PatientInfoState) signedTransaction4.getTx().getOutputs().get(0).getData();
 
+        // assertions for output
         assertEquals(outputPatientInfo4.getDose(), 2);
         assertEquals(outputPatientInfo4.getSecondDoseLot(), "456c78d");
         assertEquals(outputPatientInfo4.getSecondDoseManufacturer(), "moderna");
         assertNotEquals(outputPatientInfo4.getFirstDoseDate(), placeholder);
     }
-
-
-
-    //todo: implement tests for shit administerseconddoseinitiator flow inputs here
 
     @Test(expected = ExecutionException.class)
     public void AdministerSecondDoseButItIsNotModernaOrPfizer() throws Exception {
@@ -1256,6 +1311,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -1272,13 +1328,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -1295,13 +1353,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -1312,6 +1371,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -1328,12 +1388,13 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction3 = future3.get();
         PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
-        // assert some stuffs
+        // assertions for output
         assertEquals(outputPatientInfo3.getDose(), 1);
         assertEquals(outputPatientInfo3.getFirstDoseLot(), "123a45b");
         assertEquals(outputPatientInfo3.getFirstDoseManufacturer(), "moderna");
@@ -1347,6 +1408,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerSecondDoseInitiator administerSecondDoseFlow = new AdministerSecondDoseInitiator("marc",
                 "alejandro",
                 2,
@@ -1363,8 +1425,9 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future4 = d.startFlow(administerSecondDoseFlow);
-        network.runNetwork();
+        network.runNetwork(); // expects a failure
         SignedTransaction signedTransaction4 = future4.get();
     }
 
@@ -1385,6 +1448,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -1401,13 +1465,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -1424,13 +1490,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -1441,6 +1508,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -1457,16 +1525,17 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin node starts the flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction3 = future3.get();
         PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
-        // assert some stuffs
-        assertEquals(outputPatientInfo3.getDose(), 1);
-        assertEquals(outputPatientInfo3.getFirstDoseLot(), "123a45b");
-        assertEquals(outputPatientInfo3.getFirstDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo3.getFirstDoseDate(), placeholder);
+        // assertions for output
+        assertEquals(1, outputPatientInfo3.getDose());
+        assertEquals("123a45b", outputPatientInfo3.getFirstDoseLot());
+        assertEquals("moderna", outputPatientInfo3.getFirstDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo3.getFirstDoseDate());
 
         Date secondDoseDate = new Date();
 
@@ -1476,6 +1545,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // clinic admin node starts the flow
         AdministerSecondDoseInitiator administerSecondDoseFlow = new AdministerSecondDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -1492,6 +1562,7 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin node starts the flow
         CordaFuture<SignedTransaction> future4 = d.startFlow(administerSecondDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction4 = future4.get();
@@ -1514,6 +1585,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -1530,13 +1602,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // patient node starts flow
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -1553,13 +1627,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -1570,6 +1645,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -1586,15 +1662,16 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction3 = future3.get();
         PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
-        // assert some stuffs
-        assertEquals(outputPatientInfo3.getDose(), 1);
-        assertEquals(outputPatientInfo3.getFirstDoseLot(), "123a45b");
-        assertEquals(outputPatientInfo3.getFirstDoseManufacturer(), "moderna");
+        // assertions for output
+        assertEquals(1, outputPatientInfo3.getDose());
+        assertEquals("123a45b", outputPatientInfo3.getFirstDoseLot());
+        assertEquals("moderna", outputPatientInfo3.getFirstDoseManufacturer());
         assertNotEquals(outputPatientInfo3.getFirstDoseDate(), placeholder);
 
         Date secondDoseDate = new Date();
@@ -1605,6 +1682,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerSecondDoseInitiator administerSecondDoseFlow = new AdministerSecondDoseInitiator("marc",
                 "alejandro",
                 2,
@@ -1621,11 +1699,13 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future4 = d.startFlow(administerSecondDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction4 = future4.get();
         PatientInfoState outputPatientInfo4 = (PatientInfoState) signedTransaction4.getTx().getOutputs().get(0).getData();
 
+        // construct the flow's output
         AdministerSecondDoseInitiator administerSecondDoseFlow2 = new AdministerSecondDoseInitiator("marc",
                 "alejandro",
                 2,
@@ -1642,8 +1722,9 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future5 = d.startFlow(administerSecondDoseFlow2);
-        network.runNetwork();
+        network.runNetwork(); // failure expected
         SignedTransaction signedTransaction5 = future5.get();
     }
 
@@ -1664,6 +1745,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -1680,13 +1762,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts the flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -1703,13 +1787,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor nodr starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -1720,6 +1805,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -1736,16 +1822,17 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction3 = future3.get();
         PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
-        // assert some stuffs
-        assertEquals(outputPatientInfo3.getDose(), 1);
-        assertEquals(outputPatientInfo3.getFirstDoseLot(), "123a45b");
-        assertEquals(outputPatientInfo3.getFirstDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo3.getFirstDoseDate(), placeholder);
+        // assertions for output
+        assertEquals(1, outputPatientInfo3.getDose());
+        assertEquals("123a45b", outputPatientInfo3.getFirstDoseLot());
+        assertEquals("moderna", outputPatientInfo3.getFirstDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo3.getFirstDoseDate());
 
         Date secondDoseDate = new Date();
 
@@ -1755,6 +1842,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerSecondDoseInitiator administerSecondDoseFlow = new AdministerSecondDoseInitiator("marc",
                 "alejandro",
                 2,
@@ -1771,16 +1859,11 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node attempts to start the flow
         CordaFuture<SignedTransaction> future4 = a.startFlow(administerSecondDoseFlow);
-        network.runNetwork();
+        network.runNetwork(); // expects failure
         SignedTransaction signedTransaction4 = future4.get();
     }
-
-
-
-
-
-
 
     @Test
     public void theWholeProcess() throws Exception{
@@ -1799,6 +1882,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -1815,13 +1899,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -1838,13 +1924,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -1855,6 +1942,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -1871,14 +1959,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin node starts the flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction3 = future3.get();
         PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
-        // assert some stuffs
-        assertEquals(outputPatientInfo3.getDose(), 1);
-        assertEquals(outputPatientInfo3.getFirstDoseLot(), "123a45b");
+        // assertions for output
+        assertEquals(1, outputPatientInfo3.getDose());
+        assertEquals("123a45b", outputPatientInfo3.getFirstDoseLot());
         assertEquals(outputPatientInfo3.getFirstDoseManufacturer(), "moderna");
         assertNotEquals(outputPatientInfo3.getFirstDoseDate(), placeholder);
 
@@ -1890,6 +1979,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerSecondDoseInitiator administerSecondDoseFlow = new AdministerSecondDoseInitiator("marc",
                 "alejandro",
                 2,
@@ -1906,16 +1996,19 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future4 = d.startFlow(administerSecondDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction4 = future4.get();
         PatientInfoState outputPatientInfo4 = (PatientInfoState) signedTransaction4.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo4.getDose(), 2);
-        assertEquals(outputPatientInfo4.getSecondDoseLot(), "456c78d");
-        assertEquals(outputPatientInfo4.getSecondDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo4.getFirstDoseDate(), placeholder);
+        // assertions for output
+        assertEquals(2, outputPatientInfo4.getDose());
+        assertEquals("456c78d", outputPatientInfo4.getSecondDoseLot());
+        assertEquals("moderna", outputPatientInfo4.getSecondDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo4.getFirstDoseDate());
 
+        // construct the flow's output
         ApprovePatientForWorkInitiator approvePatientForWorkFlow = new ApprovePatientForWorkInitiator("marc",
                 "alejandro",
                 2,
@@ -1932,23 +2025,22 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future5 = d.startFlow(approvePatientForWorkFlow);
         network.runNetwork();
         SignedTransaction signedTransaction5 = future5.get();
         PatientInfoState outputPatientInfo5 = (PatientInfoState) signedTransaction5.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo5.getDose(), 2);
-        assertEquals(outputPatientInfo5.getFirstDoseLot(), "123a45b");
-        assertEquals(outputPatientInfo5.getFirstDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo5.getFirstDoseDate(), placeholder);
-        assertEquals(outputPatientInfo5.getSecondDoseLot(), "456c78d");
-        assertEquals(outputPatientInfo5.getSecondDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo5.getFirstDoseDate(), placeholder);
+        // assertions for output
+        assertEquals(2, outputPatientInfo5.getDose());
+        assertEquals("123a45b", outputPatientInfo5.getFirstDoseLot());
+        assertEquals("moderna", outputPatientInfo5.getFirstDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo5.getFirstDoseDate());
+        assertEquals("456c78d", outputPatientInfo5.getSecondDoseLot());
+        assertEquals("moderna", outputPatientInfo5.getSecondDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo5.getFirstDoseDate());
         assertTrue(outputPatientInfo5.isVaccinationProcessComplete());
     }
-
-
-    //todo: implement tests for shit approvepatientforworkinitiator flow inputs here
 
 
     @Test(expected = ExecutionException.class)
@@ -1968,6 +2060,7 @@ public class FlowTests {
         Party employer = c.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
         Party clinicAdmin = d.getInfo().getLegalIdentitiesAndCerts().get(0).getParty();
 
+        // construct the flow's output
         PatientSendInfoInitiator sendInfoFlow = new PatientSendInfoInitiator("marc",
                 "alejandro",
                 0,
@@ -1984,13 +2077,15 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // patient node starts flow
         CordaFuture<SignedTransaction> future = a.startFlow(sendInfoFlow);
         network.runNetwork();
         SignedTransaction signedTransaction = future.get();
         PatientInfoState outputPatientInfo = (PatientInfoState) signedTransaction.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo.isApprovedForVaccination(), false);
+        assertFalse(outputPatientInfo.isApprovedForVaccination());
 
+        // construct the flow's output
         ApprovePatientInitiator approvePatientFlow = new ApprovePatientInitiator("marc",
                 "alejandro",
                 0,
@@ -2007,13 +2102,14 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // doctor node starts the flow
         CordaFuture<SignedTransaction> future2 = b.startFlow(approvePatientFlow);
         network.runNetwork();
         SignedTransaction signedTransaction2 = future2.get();
 
 
         PatientInfoState outputPatientInfo2 = (PatientInfoState) signedTransaction2.getTx().getOutputs().get(0).getData();
-        assertEquals(outputPatientInfo2.isApprovedForVaccination(), true);
+        assertTrue(outputPatientInfo2.isApprovedForVaccination());
 
 
         Date firstDoseDate = new Date();
@@ -2024,6 +2120,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerFirstDoseInitiator administerFirstDoseFlow = new AdministerFirstDoseInitiator("marc",
                 "alejandro",
                 1,
@@ -2040,16 +2137,17 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin node starts the flow
         CordaFuture<SignedTransaction> future3 = d.startFlow(administerFirstDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction3 = future3.get();
         PatientInfoState outputPatientInfo3 = (PatientInfoState) signedTransaction3.getTx().getOutputs().get(0).getData();
 
-        // assert some stuffs
-        assertEquals(outputPatientInfo3.getDose(), 1);
-        assertEquals(outputPatientInfo3.getFirstDoseLot(), "123a45b");
-        assertEquals(outputPatientInfo3.getFirstDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo3.getFirstDoseDate(), placeholder);
+        // assertions for output
+        assertEquals(1, outputPatientInfo3.getDose());
+        assertEquals("123a45b", outputPatientInfo3.getFirstDoseLot());
+        assertEquals("moderna", outputPatientInfo3.getFirstDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo3.getFirstDoseDate());
 
         Date secondDoseDate = new Date();
 
@@ -2059,6 +2157,7 @@ public class FlowTests {
             e.printStackTrace();
         }
 
+        // construct the flow's output
         AdministerSecondDoseInitiator administerSecondDoseFlow = new AdministerSecondDoseInitiator("marc",
                 "alejandro",
                 2,
@@ -2075,16 +2174,19 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts the flow
         CordaFuture<SignedTransaction> future4 = d.startFlow(administerSecondDoseFlow);
         network.runNetwork();
         SignedTransaction signedTransaction4 = future4.get();
         PatientInfoState outputPatientInfo4 = (PatientInfoState) signedTransaction4.getTx().getOutputs().get(0).getData();
 
-        assertEquals(outputPatientInfo4.getDose(), 2);
-        assertEquals(outputPatientInfo4.getSecondDoseLot(), "456c78d");
-        assertEquals(outputPatientInfo4.getSecondDoseManufacturer(), "moderna");
-        assertNotEquals(outputPatientInfo4.getFirstDoseDate(), placeholder);
+        // assertions for output
+        assertEquals(2, outputPatientInfo4.getDose());
+        assertEquals("456c78d", outputPatientInfo4.getSecondDoseLot());
+        assertEquals("moderna", outputPatientInfo4.getSecondDoseManufacturer());
+        assertNotEquals(placeholder, outputPatientInfo4.getFirstDoseDate());
 
+        // construct the flow's output
         ApprovePatientForWorkInitiator approvePatientForWorkFlow = new ApprovePatientForWorkInitiator("charlie",
                 "nguyen",
                 2,
@@ -2101,46 +2203,10 @@ public class FlowTests {
                 employer,
                 clinicAdmin);
 
+        // clinic admin starts flow
         CordaFuture<SignedTransaction> future5 = d.startFlow(approvePatientForWorkFlow);
-        network.runNetwork();
+        network.runNetwork(); // expects failure
         SignedTransaction signedTransaction5 = future5.get();
         PatientInfoState outputPatientInfo5 = (PatientInfoState) signedTransaction5.getTx().getOutputs().get(0).getData();
     }
-
-
-
-    /*
-    TODO:
-        Network setup
-        Test for a usual two-dose vaccination, with employer
-            - register patient
-            - flow to doctor
-            - have doctor approve
-            - flow to patient
-            - first dose
-            - flow to patient
-            - second dose
-            - flow to patient
-            - have employer approve
-            - assert processComplete == true
-        Test for a usual one-dose vaccination, with employer
-            - register patient
-            - flow to doctor
-            - have doctor approve
-            - flow to patient
-            - dose
-            - flow to patient
-            - have employer approve
-            - assert processComplete == true
-        Test for a employer approval without dose
-            - register patient
-            - have doctor approve
-            - have employer approve
-            - throw: "Your employee has not been vaccinated yet."
-            - assert processComplete == false.
-        Test for a usual two-dose vaccination, without employer
-     */
-
-
-
 }

@@ -25,7 +25,7 @@ public class PatientContract implements Contract {
     public void verify(LedgerTransaction tx) throws IllegalArgumentException {
 
         /* We can use the requireSingleCommand function to extract command data from transaction.
-         * However, it is possible to have multiple commands in a signle transaction.*/
+         * However, it is possible to have multiple commands in a single transaction.*/
         final CommandWithParties<PatientContract.Commands> command = requireSingleCommand(tx.getCommands(), PatientContract.Commands.class);
         final PatientContract.Commands commandData = command.getValue();
 
@@ -86,7 +86,7 @@ public class PatientContract implements Contract {
                 require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
                 return null;
             });
-        } else if (command.getValue() instanceof Commands.AdministerFirstDose) { // todo: modify the above template for the commands accordingly for inputs
+        } else if (command.getValue() instanceof Commands.AdministerFirstDose) {
             //Retrieve the output state of the transaction
             PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
 
@@ -117,11 +117,8 @@ public class PatientContract implements Contract {
                 require.using("Patient's vaccination process is not complete.", !output.isVaccinationProcessComplete());
                 require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
 
-                //todo: check for lot numbers and dates
-
                 require.using("Lot number required.", !(output.getFirstDoseLot().isEmpty() || output.getFirstDoseLot().equalsIgnoreCase("none")));
                 require.using("Manufacturer required.", !(output.getFirstDoseManufacturer().isEmpty() || output.getFirstDoseManufacturer().equalsIgnoreCase("none")));
-                /* check date here*/
 //                require.using("Date required.", !(output.getFirstDoseDate().equals(placeholder)));
 
                 return null;
@@ -158,23 +155,18 @@ public class PatientContract implements Contract {
                 require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
 
 
-                //todo: check for lot numbers and dates
-
                 require.using("Lot number required.", !(output.getFirstDoseLot().isEmpty() || output.getFirstDoseLot().equalsIgnoreCase("none")));
                 require.using("Manufacturer required.", !(output.getFirstDoseManufacturer().isEmpty() || output.getFirstDoseManufacturer().equalsIgnoreCase("none")));
                 require.using("Lot number required.", !(output.getSecondDoseLot().isEmpty() || output.getSecondDoseLot().equalsIgnoreCase("none")));
                 require.using("Manufacturer required.", !(output.getSecondDoseManufacturer().isEmpty() || output.getSecondDoseManufacturer().equalsIgnoreCase("none")));
 
 
-                /* check date here*/
 //                require.using("Date required.", !(output.getFirstDoseDate().equals(placeholder)));
 //                require.using("Date required.", !(output.getSecondDoseDate().equals(placeholder)));
 
                 return null;
             });
         } else if (command.getValue() instanceof Commands.ApprovePatientForWork) {
-
-            //todo: change some shit here
             //Retrieve the output state of the transaction
             PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
 
@@ -206,8 +198,6 @@ public class PatientContract implements Contract {
                 require.using("Patient should now be ready for vaccination.", output.isApprovedForVaccination());
 
 
-                //todo: check for lot numbers and dates
-
                 require.using("Lot number required.", !(output.getFirstDoseLot().isEmpty() || output.getFirstDoseLot().equalsIgnoreCase("none")));
                 require.using("Manufacturer required.", !(output.getFirstDoseManufacturer().isEmpty() || output.getFirstDoseManufacturer().equalsIgnoreCase("none")));
                 require.using("Lot number required.", !(output.getSecondDoseLot().isEmpty() || output.getSecondDoseLot().equalsIgnoreCase("none")));
@@ -222,56 +212,6 @@ public class PatientContract implements Contract {
         } else {
             throw new IllegalArgumentException("Unrecognized command.");
         }
-
-
-
-//
-//        // todo: modify the above template for the commands accordingly for inputs
-//        if (commandData.equals(new PatientContract.Commands.AdministerFirstDose())) {
-//            //Retrieve the output state of the transaction
-//            PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
-//
-//            //Using Corda DSL function requireThat to replicate conditions-checks
-//            requireThat(require -> {
-////                require.using("No inputs should be consumed when sending just the patient information", tx.getInputStates().size() == 0);
-//
-//                require.using("Patient should currently not have any doses", output.getDose() != 0);
-//                return null;
-//            });
-//        }
-//
-//        // todo: modify the above template for the commands accordingly for inputs
-//        if (commandData.equals(new PatientContract.Commands.AdministerSecondDose())) {
-//            //Retrieve the output state of the transaction
-//            PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
-//
-//            //Using Corda DSL function requireThat to replicate conditions-checks
-//            requireThat(require -> {
-////                require.using("No inputs should be consumed when sending just the patient information", tx.getInputStates().size() == 0);
-//
-//                require.using("Patient should currently have one dose.", output.getDose() != 1);
-//                return null;
-//            });
-//        }
-//
-//        // todo: modify the above template for the commands accordingly for inputs
-//        if (commandData.equals(new PatientContract.Commands.ApprovePatientForWork())) {
-//            //Retrieve the output state of the transaction
-//            PatientInfoState output = tx.outputsOfType(PatientInfoState.class).get(0);
-//
-//            //Using Corda DSL function requireThat to replicate conditions-checks
-//            requireThat(require -> {
-////                require.using("No inputs should be consumed when sending just the patient information", tx.getInputStates().size() == 0);
-//
-//                // todo: check for input with pfizer, moderna
-//                require.using("Patient should have their two doses.", !(output.getDose() == 2 || output.getFirstDoseManufacturer() == null));
-//                return null;
-//            });
-//        }
-
-
-
-
     }
 
     // Used to indicate the transaction's intent.
@@ -279,7 +219,6 @@ public class PatientContract implements Contract {
         // Multiple commands for
         class SendInfo implements PatientContract.Commands {}
         class ApprovePatient implements PatientContract.Commands {}
-        class AdministerOneVaccine implements PatientContract.Commands {} // dont worry aboout this command till later
         class AdministerFirstDose implements PatientContract.Commands {}
         class AdministerSecondDose implements PatientContract.Commands {}
         class ApprovePatientForWork implements PatientContract.Commands {}

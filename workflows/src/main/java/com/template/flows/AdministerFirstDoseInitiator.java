@@ -101,11 +101,11 @@ public class AdministerFirstDoseInitiator extends FlowLogic<SignedTransaction>  
         // TODO: facilitate inputs from ApprovePatient flow.
 
         if (!getOurIdentity().equals(clinicAdmin)) {
+            System.out.println("This transaction needs to be initiated by a clinic administrator.");
             throw new IllegalStateException("This transaction needs to be initiated by a clinic administrator.");
         }
 
-        // Step 1. Get a reference to the notary service on our network and our key pair.
-        // Note: ongoing work to support multiple notary identities is still in progress.
+        // get a reference to the notary service on our network and our key pair.
         final Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
         // get vault
@@ -123,15 +123,17 @@ public class AdministerFirstDoseInitiator extends FlowLogic<SignedTransaction>  
 
         // check if the patient's doctor has started this transaction
         if (!(getOurIdentity().equals(inputPatientInfoState.getClinicAdmin()))) {
+            System.out.println("The patient's clinic administrator must start this transaction.");
             throw new IllegalStateException("The patient's clinic administrator must start this transaction.");
         }
 
         // check for any prior dosages
         if (inputPatientInfoState.getDose() >= 1) {
+            System.out.println("The patient has already received their first dose.");
             throw new IllegalArgumentException("The patient has already received their first dose.");
         }
 
-        //Compose the State that carries the Hello World message
+        // compose the data to be outputted
         final PatientInfoState output =
                 new PatientInfoState(firstName,
                         lastName,
@@ -149,28 +151,28 @@ public class AdministerFirstDoseInitiator extends FlowLogic<SignedTransaction>  
                         patientEmployer,
                         clinicAdmin);
 
-        // Step 3. Create a new TransactionBuilder object.
+        // create a new TransactionBuilder object.
         final TransactionBuilder builder = new TransactionBuilder(notary);
 
-        // Step 4. Add the iou as an output state, as well as a command to the transaction builder.
+        // add the patient info as an output state, as well as a command to the transaction builder.
         builder.addInputState(inputPatientInfoStateAndRef);
         builder.addOutputState(output);
         builder.addCommand(new PatientContract.Commands.AdministerFirstDose(),
                 Arrays.asList(this.patientFullName.getOwningKey(), this.doctor.getOwningKey(), this.patientEmployer.getOwningKey(), this.clinicAdmin.getOwningKey()));
 
-        // Step 5. Verify and sign it with our KeyPair.
+        // verify and sign it with our KeyPair.
         builder.verify(getServiceHub());
         final SignedTransaction ptx = getServiceHub().signInitialTransaction(builder);
 
 
-        // Step 6. Collect the other party's signature using the SignTransactionFlow.
+        // collect the other party's signature using the SignTransactionFlow.
         List<Party> otherParties = output.getParticipants().stream().map(el -> (Party)el).collect(Collectors.toList());
         otherParties.remove(getOurIdentity());
         List<FlowSession> sessions = otherParties.stream().map(el -> initiateFlow(el)).collect(Collectors.toList());
 
         SignedTransaction stx = subFlow(new CollectSignaturesFlow(ptx, sessions));
 
-        // Step 7. Assuming no exceptions, we can now finalise the transaction
+        // assuming no exceptions, we can now finalise the transaction
         return subFlow(new FinalityFlow(stx, sessions));
     }
 

@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 
 public class ApprovePatientInitiator extends FlowLogic<SignedTransaction> {
 
-
-    // We will not use these ProgressTracker for this Hello-World sample
     private final ProgressTracker progressTracker = new ProgressTracker();
     @Override
     public ProgressTracker getProgressTracker() {
@@ -101,14 +99,14 @@ public class ApprovePatientInitiator extends FlowLogic<SignedTransaction> {
     @Suspendable
     @Override
     public SignedTransaction call() throws FlowException {
-        // TODO: facilitate inputs from PatientSendInfo flow.
 
         if (!getOurIdentity().equals(doctor)) {
+            // print to shell
+            System.out.println("This transaction needs to be initiated by a doctor.");
             throw new IllegalStateException("This transaction needs to be initiated by a doctor.");
         }
 
-        // Step 1. Get a reference to the notary service on our network and our key pair.
-        // Note: ongoing work to support multiple notary identities is still in progress.
+        // get a reference to the notary service on our network and our key pair.
         final Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
         // get vault
@@ -126,15 +124,17 @@ public class ApprovePatientInitiator extends FlowLogic<SignedTransaction> {
 
         // check if the patient's doctor has started this transaction
         if (!(getOurIdentity().equals(inputPatientInfoState.getDoctor()))) {
+            System.out.println("The patient's doctor must start this transaction.");
             throw new IllegalStateException("The patient's doctor must start this transaction.");
         }
 
         // check for any prior dosages
         if (inputPatientInfoState.getDose() > 0) {
+            System.out.println("The patient has already started their vaccination process.");
             throw new IllegalArgumentException("The patient has already started their vaccination process.");
         }
 
-        //Compose the State that carries the Hello World message
+        // compose the data to be outputted
         final PatientInfoState output =
                 new PatientInfoState(firstName,
                         lastName,
@@ -152,28 +152,27 @@ public class ApprovePatientInitiator extends FlowLogic<SignedTransaction> {
                         patientEmployer,
                         clinicAdmin);
 
-        // Step 3. Create a new TransactionBuilder object.
+        // create a new TransactionBuilder object.
         final TransactionBuilder builder = new TransactionBuilder(notary);
 
-        // Step 4. Add the iou as an output state, as well as a command to the transaction builder.
+        // add the patient info as an output state, as well as a command to the transaction builder.
         builder.addInputState(inputPatientInfoStateAndRef);
         builder.addOutputState(output);
         builder.addCommand(new PatientContract.Commands.ApprovePatient(),
                 Arrays.asList(this.patientFullName.getOwningKey(), this.doctor.getOwningKey(), this.patientEmployer.getOwningKey(), this.clinicAdmin.getOwningKey()));
 
-        // Step 5. Verify and sign it with our KeyPair.
+        // verify and sign it with our KeyPair.
         builder.verify(getServiceHub());
         final SignedTransaction ptx = getServiceHub().signInitialTransaction(builder);
 
-
-        // Step 6. Collect the other party's signature using the SignTransactionFlow.
+        // collect the other party's signature using the SignTransactionFlow.
         List<Party> otherParties = output.getParticipants().stream().map(el -> (Party)el).collect(Collectors.toList());
         otherParties.remove(getOurIdentity());
         List<FlowSession> sessions = otherParties.stream().map(el -> initiateFlow(el)).collect(Collectors.toList());
 
         SignedTransaction stx = subFlow(new CollectSignaturesFlow(ptx, sessions));
 
-        // Step 7. Assuming no exceptions, we can now finalise the transaction
+        // assuming no exceptions, we can now finalise the transaction
         return subFlow(new FinalityFlow(stx, sessions));
     }
 }

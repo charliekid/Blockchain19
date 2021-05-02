@@ -1,9 +1,7 @@
 package com.template.webserver;
 
 import com.template.contracts.PatientContract;
-import com.template.flows.AdministerFirstDoseInitiator;
-import com.template.flows.ApprovePatientInitiator;
-import com.template.flows.PatientSendInfoInitiator;
+import com.template.flows.*;
 import com.template.states.PatientInfoState;
 import net.corda.client.rpc.CordaRPCClient;
 import net.corda.client.rpc.CordaRPCConnection;
@@ -52,7 +50,7 @@ public class Controller {
         return "Hi " + name;
     }
 
-    //@GetMapping("patientInof")()
+    //@GetMapping("patientInfo")()
 //    @GetMapping("patientInfo")
 //    public PatientInfoState patientInfo(PatientInfoState patient){
 //        return patient;
@@ -67,8 +65,34 @@ public class Controller {
         String date = firstDoseDate.toString();
         return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
     }*/
-    @PostMapping("clinicAdminApproval")
-    public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName, @RequestHeader String firstDate, @RequestHeader String lotOne, @RequestHeader String secDate, @RequestHeader String secLot, @RequestHeader String username ) throws ParseException {
+
+    @PostMapping("clinicAdminFirstApproval")
+    public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName,
+                           @RequestHeader int doseNumber, @RequestHeader String dateVaccinated, @RequestHeader String lotNumber,
+                           @RequestHeader String username ) throws ParseException {
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
+
+        // We need to get all the parties identies.
+        Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
+        Party doctorNodes = connectNodeViaRPC("Doctor1").nodeInfo().getLegalIdentities().get(0);
+        Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
+        Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
+
+        // Parse the date
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date vaccinatedDate = df.parse(dateVaccinated);
+
+        activeParty.startFlowDynamic(AdministerFirstDoseInitiator.class, firstName, lastName, doseNumber,
+                true, vaccinatedDate, lotNumber, mfrName,
+                new Date(0000-00-00), "none", "none",
+                false, patientNode, doctorNodes, employerNode, clinicAdmin1);
+        return "Patient: " + firstName + "'s" + " #" + doseNumber + " was registered in the system";
+
+    }
+    @PostMapping("clinicAdminSecondApproval")
+    public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName,
+                           @RequestHeader String firstDate, @RequestHeader String lotOne, @RequestHeader String secDate,
+                           @RequestHeader String secLot, @RequestHeader String username, @RequestHeader int doseNumber ) throws ParseException {
         CordaRPCOps activeParty = connectNodeViaRPC(username);
         // We need to get all the parties identies.
         Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
@@ -81,11 +105,35 @@ public class Controller {
         Date secondDate = df.parse(secDate);
         //DateFormat newDate1()
 
-        activeParty.startFlowDynamic(AdministerFirstDoseInitiator.class, firstName, lastName,1,true,firDate, lotOne,mfrName,
-                secondDate,secLot,mfrName,false,patientNode, doctorNodes,employerNode,clinicAdmin1);
+        // went n replaced the first dose initiator with the second dose initiator -- marc
+        activeParty.startFlowDynamic(AdministerSecondDoseInitiator.class, firstName, lastName, doseNumber,true,firDate, lotOne,mfrName,
+                secondDate,secLot,mfrName,true,patientNode, doctorNodes,employerNode,clinicAdmin1);
 
 
-        return "Patient: " + firstName + "is approved for first vaccine";
+        return "Patient: " + firstName + "'s" + " #" + doseNumber + " was registered in the system";
+    }
+
+    // just added this. delete or modify as needed -- marc
+    @PostMapping("clinicAdminWorkApproval")
+    public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName,
+                           @RequestHeader String firstDate, @RequestHeader String lotOne, @RequestHeader String secDate,
+                           @RequestHeader String secLot, @RequestHeader String username, @RequestHeader int doseNumber, @RequestHeader boolean vaccinationProcessComplete ) throws ParseException {
+        CordaRPCOps activeParty = connectNodeViaRPC(username);
+        // We need to get all the parties identies.
+        Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
+        Party doctorNodes = connectNodeViaRPC("Doctor1").nodeInfo().getLegalIdentities().get(0);
+        Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
+        Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date firDate = df.parse(firstDate);
+        Date secondDate = df.parse(secDate);
+
+        // gonna go and replace the firstdose with the second dose
+        activeParty.startFlowDynamic(ApprovePatientForWorkInitiator.class, firstName, lastName, doseNumber,true,firDate, lotOne,mfrName,
+                secondDate,secLot,mfrName,true,patientNode, doctorNodes,employerNode,clinicAdmin1);
+
+        return "Patient: " + firstName + "'s" + " #" + doseNumber + " was registered in the system";
     }
 
     @PostMapping("registerVaccine")
@@ -112,7 +160,7 @@ public class Controller {
     @PostMapping("approvePatient")
     public String approvePatient(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String username){
         CordaRPCOps activeParty = connectNodeViaRPC(username);
-        // We need to get all the parties identies.
+        // We need to get all the parties identities.
         Party patientNode = connectNodeViaRPC("Patient1").nodeInfo().getLegalIdentities().get(0);
         Party doctorNodes = connectNodeViaRPC("Doctor1").nodeInfo().getLegalIdentities().get(0);
         Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
@@ -167,7 +215,7 @@ public class Controller {
      * @param partyName
      * @return
      */
-    private static CordaRPCOps connectNodeViaRPC(String partyName) {
+    public static CordaRPCOps connectNodeViaRPC(String partyName) {
         int port = getPortAddress(partyName);
         String host = "localhost";
         String username = "";

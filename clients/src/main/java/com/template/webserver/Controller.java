@@ -20,7 +20,6 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-
 /**
  * Define your API endpoints here.
  */
@@ -34,38 +33,20 @@ public class Controller {
         this.proxy = rpc.proxy;
     }
 
-    @GetMapping(value = "/templateendpoint", produces = "text/plain")
-    private String templateendpoint() {
-        return "Define an endpoint here.";
-    }
 
     /**
-     * Gets the asset list pertaining to the party. In this case, this is all the transaction that
-     * is viewable by the party.
+     * POST - Used for a clinic admin to approve the first dosage administered to a patient
+     * @param firstName - first name of the patient
+     * @param lastName - last name of the patient
+     * @param mfrName - manufacturer of the vaccine
+     * @param doseNumber - which dose number is being administered
+     * @param dateVaccinated - date the vaccination occurred
+     * @param lotNumber - lot number of the vaccine
+     * @param username - the username of the party submitting this transaction
      * @return
+     * @throws ParseException TODO: Jorge please take care of this parse exception you created
+     * Created by Jorge and Charlie
      */
-
-    @PostMapping("testing")
-    public String testing(@RequestHeader String name){
-        return "Hi " + name;
-    }
-
-    //@GetMapping("patientInfo")()
-//    @GetMapping("patientInfo")
-//    public PatientInfoState patientInfo(PatientInfoState patient){
-//        return patient;
-//    }
-/*
-    @PostMapping("registerVaccine")
-    public PatientInfoState registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader int dose,
-                                  @RequestHeader Boolean approved, @RequestHeader Date firstDoseDate, @RequestHeader String firstDoselot, @RequestHeader String firstDoseMfr,
-                                  @RequestHeader Date secondDate, @RequestHeader String secondDoseLot, @RequestHeader String secondMfr, @RequestHeader Boolean vaccinationProcessComplete,
-                                  @RequestHeader Party patientFullName, @RequestHeader Party doctor, @RequestHeader Party patientEmployer, @RequestHeader Party clinicAdmin){
-
-        String date = firstDoseDate.toString();
-        return new PatientInfoState(firstName,lastName,dose,approved,firstDoseDate,firstDoselot,firstDoseMfr,secondDate,secondDoseLot,secondMfr,vaccinationProcessComplete,patientFullName,doctor,patientEmployer,clinicAdmin);
-    }*/
-
     @PostMapping("clinicAdminFirstApproval")
     public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName,
                            @RequestHeader int doseNumber, @RequestHeader String dateVaccinated, @RequestHeader String lotNumber,
@@ -82,6 +63,7 @@ public class Controller {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Date vaccinatedDate = df.parse(dateVaccinated);
 
+        // Start the transaction and get other parties to signed
         activeParty.startFlowDynamic(AdministerFirstDoseInitiator.class, firstName, lastName, doseNumber,
                 true, vaccinatedDate, lotNumber, mfrName,
                 new Date(0000-00-00), "none", "none",
@@ -89,6 +71,22 @@ public class Controller {
         return "Patient: " + firstName + "'s" + " #" + doseNumber + " was registered in the system";
 
     }
+
+    /**
+     * POST - Used for a clinic admin to approve the second dosage administered to a patient
+     * @param firstName first name of the patient
+     * @param lastName - last name of the patient
+     * @param mfrName - manufacturer of the vaccine
+     * @param firstDate - date of the first vaccine admin
+     * @param lotOne - lot number of the first vaccine
+     * @param secDate - date of the second vaccine admin
+     * @param secLot - lot number of the second vaccine
+     * @param username - the username of the party submitting this transaction
+     * @param doseNumber - which dose number is being administered
+     * @return
+     * @throws ParseException TODO: Jorge please take care of this parse exception you created
+     * Created by Jorge and Charlie
+     */
     @PostMapping("clinicAdminSecondApproval")
     public String approval(@RequestHeader String firstName, @RequestHeader String lastName,@RequestHeader String mfrName,
                            @RequestHeader String firstDate, @RequestHeader String lotOne, @RequestHeader String secDate,
@@ -104,10 +102,9 @@ public class Controller {
         Date firDate = df.parse(firstDate);
         Date secondDate = df.parse(secDate);
 
-        // went n replaced the first dose initiator with the second dose initiator -- marc
+        // Start the transaction and get other parties to signed
         activeParty.startFlowDynamic(AdministerSecondDoseInitiator.class, firstName, lastName, doseNumber,true,firDate, lotOne,mfrName,
                 secondDate,secLot,mfrName,true,patientNode, doctorNodes,employerNode,clinicAdmin1);
-
 
         return "Patient: " + firstName + "'s" + " #" + doseNumber + " was registered in the system";
     }
@@ -135,6 +132,14 @@ public class Controller {
         return "Patient: " + firstName + "'s" + " #" + doseNumber + " was registered in the system";
     }
 
+    /**
+     * POST - register a patient to be vaccinated
+     * @param firstName - first name of the patient
+     * @param lastName - last name of the patient
+     * @param dose - number of vaccines
+     * @param username - the username of the party submitting this transaction
+     * @return
+     */
     @PostMapping("registerVaccine")
     public String registerVaccine(@RequestHeader String firstName, @RequestHeader String lastName, @RequestHeader int dose, @RequestHeader String username){
         CordaRPCOps activeParty = connectNodeViaRPC(username);
@@ -144,18 +149,22 @@ public class Controller {
         Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
         Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
 
-//        PatientSendInfoInitiator flow = new PatientSendInfoInitiator(firstName, lastName, 0, false,
-//                                new Date(0000-00-00), "none", "none",
-//                                new Date(0000-00-00), "none", "none",
-//                false, patientNode, doctorNodes, employerNode, clinicAdmin1);
+        // Start the transaction and get other parties to signed
         activeParty.startFlowDynamic(PatientSendInfoInitiator.class, firstName, lastName, 0, false,
                 new Date(0000-00-00), "none", "none",
                 new Date(0000-00-00), "none", "none",
                 false, patientNode, doctorNodes, employerNode, clinicAdmin1);
-        return "Hi," + firstName + " " + lastName + " currently recieved " + dose;
+        return "Hi," + firstName + " " + lastName ;
 
     }
 
+    /**
+     * Approve the patient so that the clinic admin can begin to admin vaccines
+     * @param firstName - first name of a patient
+     * @param lastName - last name of patient
+     * @param username - the username of the party submitting this transaction
+     * @return
+     */
     @PostMapping("approvePatient")
     public String approvePatient(@RequestParam String firstName, @RequestParam String lastName, @RequestParam String username){
         CordaRPCOps activeParty = connectNodeViaRPC(username);
@@ -165,6 +174,7 @@ public class Controller {
         Party employerNode = connectNodeViaRPC("Employer1").nodeInfo().getLegalIdentities().get(0);
         Party clinicAdmin1 = connectNodeViaRPC("ClinicAdmin1").nodeInfo().getLegalIdentities().get(0);
 
+        // Start the transaction and get other parties to signed
         activeParty.startFlowDynamic(ApprovePatientInitiator.class, firstName, lastName, 0, true,
                 new Date(0000-00-00), "none", "none",
                 new Date(0000-00-00), "none", "none",
@@ -174,6 +184,11 @@ public class Controller {
 
     }
 
+    /**
+     * This will get a list of transaction associated with the username
+     * @param username - the username of the party submitting this transaction
+     * @return
+     */
     @GetMapping("transaction/list/{username}")
     public APIResponse<List<StateAndRef<PatientInfoState>>> getAssetList(@PathVariable String username){
         CordaRPCOps activeParty = connectNodeViaRPC(username);
@@ -194,6 +209,7 @@ public class Controller {
      * This should get updated as you put in more nodes and specify its ports
      * @param partyName
      * @return
+     * By charlie
      */
     private static int getPortAddress(String partyName) {
         if(partyName.equals("Patient1")) {
@@ -213,6 +229,7 @@ public class Controller {
      * TODO:currently i have hardcoded the username and password. must find better way to do this.
      * @param partyName
      * @return
+     * By Charlie
      */
     public static CordaRPCOps connectNodeViaRPC(String partyName) {
         int port = getPortAddress(partyName);
@@ -233,11 +250,6 @@ public class Controller {
             CordaRPCConnection connection = client.start(username, password);
             CordaRPCOps cordaRPCOperations = connection.getProxy();
             return cordaRPCOperations;
-
-            //System.out.println();
-            //return ;
-
-
     }
 
 }

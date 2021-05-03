@@ -205,14 +205,33 @@ Once you've finished the CorDapp's code, run it with the following steps:
   * Windows:   `build\nodes\runnodes.bat`
   * macOS:     `build/nodes/runnodes`
 
-* Open the nodes are started, go to the terminal of Patient1 (not the notary!)
+* Once the nodes have been deployed and are running, go to the terminal of Patient1 (not the notary!)
   and run the following command to send information to Doctor1:
+  
+```
+flow start PatientSendInfoInitiator firstName: "Charlie", lastName: "Nguyen", dose: "0", approvedForVaccination: "false", firstDoseDate: "0000-00-00", firstDoseLot: "none", firstDoseManufacturer: "none", secondDoseDate: "0000-00-00", secondDoseLot: "none", secondDoseManufacturer: "none", vaccinationProcessComplete: "false", patientFullName: Patient1, doctor: Doctor1, patientEmployer: Employer1, clinicAdmin: clinicAdmin1
+```
 
-  `flow start PatientSendInfoInitiator firstName: "Charlie", lastName: "Nguyen", dose: "0", patientFullName: Patient1, doctor: Doctor1, patientEmployer: Employer1`
+* The following command will then be run on the Doctor1 Node:
+```
+flow start ApprovePatientInitiator firstName: "Charlie", lastName: "Nguyen", dose: "0", approvedForVaccination: "true", firstDoseDate: "0000-00-00", firstDoseLot: "none", firstDoseManufacturer: "none", secondDoseDate: "0000-00-00", secondDoseLot: "none", secondDoseManufacturer: "none", vaccinationProcessComplete: "false", patientFullName: Patient1, doctor: Doctor1, patientEmployer: Employer1, clinicAdmin: clinicAdmin1
+```
+* Afterwards, the ClinicAdmin1 Node can run those three commands:
+```
+flow start AdministerFirstDoseInitiator firstName: "Charlie", lastName: "Nguyen", dose: "1", approvedForVaccination: "true", firstDoseDate: "2021-03-03", firstDoseLot: "123a45b", firstDoseManufacturer: "pfizer", secondDoseDate: "0000-00-00", secondDoseLot: "none", secondDoseManufacturer: "none", vaccinationProcessComplete: "false", patientFullName: Patient1, doctor: Doctor1, patientEmployer: Employer1, clinicAdmin: clinicAdmin1
 
-* You can now see the tokens in the vaults of Patient1 and Doctor1 and Employer1
+flow start AdministerSecondDoseInitiator firstName: "Charlie", lastName: "Nguyen", dose: "2", approvedForVaccination: "true", firstDoseDate: "2021-03-03", firstDoseLot: "123a45b", firstDoseManufacturer: "pfizer", secondDoseDate: "2021-03-24", secondDoseLot: "678c90d", secondDoseManufacturer: "pfizer", vaccinationProcessComplete: "false", patientFullName: Patient1, doctor: Doctor1, patientEmployer: Employer1, clinicAdmin: clinicAdmin1
+
+flow start ApprovePatientForWorkInitiator firstName: "Charlie", lastName: "Nguyen", dose: "2", approvedForVaccination: "true", firstDoseDate: "2021-03-03", firstDoseLot: "123a45b", firstDoseManufacturer: "pfizer", secondDoseDate: "2021-03-24", secondDoseLot: "678c90d", secondDoseManufacturer: "pfizer", vaccinationProcessComplete: "true", patientFullName: Patient1, doctor: Doctor1, patientEmployer: Employer1, clinicAdmin: clinicAdmin1
+```
+
+The Employer1 Node acts as an observer for those transactions, not actually facilitating any transactions.
+
+
+* You can now see the tokens in the vaults of Patient1, Doctor1, Employer1, and ClinicAdmin1 nodes.
   by running the following command in their respective terminals:
 
   `run vaultQuery contractStateType: com.template.states.PatientInfoState`
+  
 
 * You must run both the "runTemplateServer" (ran in the root of project) and "npx nodemon" (ran in root of resources within clients folder)

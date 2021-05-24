@@ -6,7 +6,7 @@ This project is implement a blockchain system that will decentralize and help tr
 [Source Code](https://github.com/charliekid/Blockchain19)
 
 
-## Project Mission / Motiviation
+## Project Mission / Motivation
 
 There is limited visibility within the medical supply chain when it comes to receiving medications or vaccinations. From manufacturers, logistics, hospitals/clinics, and recipients there is a lack of transparency with the process that causes errors, waste of resources (money and time), and are more susceptible to data breaches.
 
@@ -30,9 +30,6 @@ We will work with Jonathan and Matt from the DMDC to make a program that will tr
 ## Project Deliverables
 - Blockchain-powered tracker for supply chain management
 - A document comparing the performance of blockchain compared to other databases
-
-
-
 
 
 # Running this Project
